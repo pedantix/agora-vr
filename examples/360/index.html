@@ -10,6 +10,7 @@
   <script src="/public/js/play-on-vrdisplayactivate-or-enter-vr.js"></script>
   <script src="/public/js/hide-once-playing2.js"></script>
    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <script src="/js/parseURL.js"></script>
 
 </head>
 <body>
@@ -47,8 +48,11 @@
 
 	<script>
 
-	var appid="20b7c51ff4c644ab80cf5a4e646b0537";
-	var room="vr360";
+        const paramsString = document.location.search;
+        const searchParams = new URLSearchParams(paramsString);
+
+	var appid=searchParams.get("appid");
+	var room=searchParams.get("room");
 	var token=null;
 	var clientId=null;
         var agoraClient=AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
