@@ -1,0 +1,318 @@
+<html>
+<head>
+  <!-- Dimitrios Ververidis for CERTH/ITI, 25/1/2022 -->
+  <meta charset="utf-8">
+  <title></title>
+
+  <meta name="description" content="Dev Example — Networked-Aframe with Green Screen effect">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="/dist/aframe-extras.min.js"></script>
+  <script src="../public/js/aframe-chromakey-material2.min.js"></script>
+<!--
+  <script src="/js/play-video-on-win-click.js"></script>
+  <script src="/js/play-on-vrdisplayactivate-or-enter-vr.js"></script>
+  <script src="/js/hide-once-playing.js"></script>-->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+  <script src="/easyrtc/easyrtc.js"></script>
+  <script src="/js/vbg0.js"></script>
+  <script src="/js/AgoraRTC_N_4_8_2.js"></script>
+  <script src="/dist/networked-aframe.js"></script>
+  <script src="/js/gui_controls.js"></script>
+  <script src="/js/black_screen.js"></script>
+  <script src="/js/parseURL.js"></script>
+  <script src="/js/set_player_position.js"></script>
+  <script src="/js/start_process_video.js"></script>
+  <script src="/js/on-connect_vr.js"></script>
+  <script src="/js/dom_content_loaded.js"></script>
+
+  <script>
+      // Note the way we're establishing the NAF schema here; this is a bit awkward
+      // because of a recent bug found in the original handling. This mitigates that bug for now,
+      // until a refactor in the future that should fix the issue more cleanly.
+      NAF.schemas.getComponentsOriginal = NAF.schemas.getComponents;
+
+      // This one is necessary, because tracking the .head child component's material's color
+      // won't happen unless we tell NAF to keep it in sync, like here.
+      NAF.schemas.getComponents = (template) => {
+        if (!NAF.schemas.hasTemplate("#avatar-template")) {
+          NAF.schemas.add({
+            template: '#avatar-template',
+            components: [
+              // position and rotation are synced by default, but if we declare
+              // a custom schema, then ommitting them will cause them to go untracked.
+              'player-info'
+            ]
+          });
+        }
+        if (!NAF.schemas.hasTemplate("#screen-template")) {
+          NAF.schemas.add({
+            template: '#screen-template',
+            components: [
+              // position and rotation are synced by default, but if we declare
+              // a custom schema, then ommitting them will cause them to go untracked.
+              'position',
+              'seat',
+              'width',
+              'height'
+            ]
+          });
+        }
+        if (!NAF.schemas.hasTemplate("#camera-rig-template")) {
+          NAF.schemas.add({
+            template: '#camera-rig-template',
+            components: [
+              // position and rotation are synced by default, but if we declare
+              // a custom schema, then ommitting them will cause them to go untracked.
+              'position',
+              'rotation'
+            ]
+          });
+        }   
+        if (!NAF.schemas.hasTemplate("#camera-rig-template-oculus")) {
+          NAF.schemas.add({
+            template: '#camera-rig-template-oculus',
+            components: [
+              // position and rotation are synced by default, but if we declare
+              // a custom schema, then ommitting them will cause them to go untracked.
+              'position',
+              'rotation'
+            ]
+          });
+        } 
+        // likewise for the left-hand-template and right-hand-template--since we're only
+        // syncing position/rotation, no schema declaration needed!
+
+        const components = NAF.schemas.getComponentsOriginal(template);
+        return components;
+      }
+  </script>
+  <script src="/dist/naf-agora-adapter.js?cache=1111"></script>
+  <!-- import the deprecated Geometry part -->
+  <script src="/js/Geometry.js"></script>
+  <!--<script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>-->
+  <script src="/js/wait_for_element.js"></script>
+  <script src="/js/look_conf_scene.js"></script>
+  <script src="/js/tracked-vr-device.js"></script>
+  <script src="/js/gun.component.js"></script>
+  <script src="/js/forward.component.js"></script>
+  <script src="/js/remove-in-seconds.component.js"></script>
+  <script src="/js/light-map-geometry.js"></script>
+  <!--<script src="/js/navpointer.component.js"></script>-->
+
+<script>
+
+</script>
+
+  <link rel="stylesheet" type="text/css" href="/css/style.css" />
+  <link rel="stylesheet" type="text/css" href="/css/adv-screen.css" />
+
+</head>
+<body>
+<input
+      disabled
+      id="username-overlay"
+      style="z-index: 100; bottom: 24px; left: 24px; position:fixed; display: none;"
+      oninput="document.getElementById('avatar-template').setAttribute('player-info', 'name', this.value)"
+/>
+<a-scene id="scene" inspector-plugin-recast
+  networked-scene="
+      app: 010f1d7fd17146be9a8b1a92b7260a79;
+      room: {'name':'vrsa', 'vbg0':false, 'showLocal': false};
+      connectOnLoad: false;
+      debug: true;
+      adapter: agorartc;
+      audio: false;
+      video: false;
+    ">
+ <!--a-videosphere src="./public/video/night.mov" crossorigin="anonymous"></a-videosphere-->
+
+  <a-assets>
+<!--Studio assets-->  
+    <!--Textures Used-->
+	<img id="sky" src="/textures/Studio/sky.jpg">
+	<img id="sky2" src="/textures/Studio/sky2.jpg">
+	<img id="LM" src="/textures/Studio_v2/LectureHall_LM.jpg">
+	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video" autoplay loop="true" src="/public/video/video_wall9.mp4"> 
+	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video2" autoplay loop="true" src="/public/video/PacManVideo.mp4"> 
+	<img id="FloorPattern" src="/textures/Studio/FloorPattern.png">
+	<img id="DeskGradient_Agora" src="/textures/Studio/DeskGradient_Agora.png">
+	<!--img id="SeatFabric" src="/textures/Studio/SeatFabric.jpg"-->
+	<!--img id="CarpetFabric1" src="/textures/Studio/CarpetFabric1.jpg"-->
+	<!--img id="CarpetFabric2" src="/textures/Studio/CarpetFabric2.jpg"-->
+	<img id="Wood" src="/textures/Studio_v2/Wood.jpg">
+	<img id="DigiFrame1" src="/textures/Studio/GamePoster1.jpg">
+	<img id="DigiFrame2" src="/textures/Studio/GamePoster2.jpg">
+	<img id="DigiFrame3" src="/textures/Studio/GamePoster3.jpg">
+	<img id="DigiFrame4" src="/textures/Studio/GamePoster4.jpg">
+	<img id="DigiFrame5" src="/textures/Studio/GamePoster5.jpg">
+	<img id="DigiFrame6" src="/textures/Studio/GamePoster6.jpg">	
+	<img id="DigiFrame7" src="/textures/Studio/GamePoster7.jpg">	
+	<img id="DigiFrame8" src="/textures/Studio/GamePoster8.jpg">	
+  
+	<!--LightMapped objects-->
+
+	<a-asset-item id="DeskObj" src="/assets/Studio_v2/Desk.obj"></a-asset-item>
+	<a-asset-item id="FloorObj" src="/assets/Studio_v2/Floor.obj"></a-asset-item>
+	<a-asset-item id="SittingAreaLightObj" src="/assets/Studio_v2/SittingAreaLight.obj"></a-asset-item>
+	<a-asset-item id="SittingAreaDarkObj" src="/assets/Studio_v2/SittingAreaDark.obj"></a-asset-item>
+	<a-asset-item id="StageObj" src="/assets/Studio_v2/Stage.obj"></a-asset-item>
+	<a-asset-item id="WallsObj" src="/assets/Studio_v2/Walls.obj"></a-asset-item>
+	<a-asset-item id="CeilingObj" src="/assets/Studio_v2/Ceiling.obj"></a-asset-item>
+
+	<!--Non-LightMapped objects-->
+	<!--<a-asset-item id="BackScreen" src="/assets/Studio/BackScreen.obj"></a-asset-item>
+	<a-asset-item id="DeskBanner" src="/assets/Studio/DeskBanner.obj"></a-asset-item>
+	<a-asset-item id="LightEmissive" src="/assets/Studio/LightEmissive.obj"></a-asset-item>
+	<a-asset-item id="CenterStageFloor" src="/assets/Studio/CenterStageFloor.obj"></a-asset-item>-->
+	
+<!--End of Studio assets-->   
+    <a-asset-item id="nav_mesh" src="/assets/Studio_v2/Navmesh.glb"></a-asset-item>  
+    <!-- Camera Rig Oculus / Player -->
+    <template id="camera-rig-template-oculus">
+      <a-entity id="oculusHead" gltf-model="#OculusGlb" positon="0 0 0" scale="0.3 0.3 0.3">
+      </a-entity>
+    </template>
+
+    <!-- Camera Rig / Player -->
+    <template id="camera-rig-template">
+      <a-entity id="MannequinParent" scale="0.01 0.01 0.01">
+        <a-entity obj-model="obj: /assets/Studio_v2/MannequinHead.obj"  id="MannequinHead"  position="0 15 0" rotation="0 180 0"  material="color: #ffffff; metalness: 0.4; roughness: 0.4; sphericalEnvMap: #sky2"></a-entity>
+      </a-entity>
+   </template>
+
+    <!-- <img id="sky" src="/public/img/mr9.jpeg" crossorigin="anonymous" /> -->
+
+    <!-- My streming screen plane -->
+    <template id="screen-template">
+      <a-plane class="screenPlane" visible="false" look-at="#player" position="0 0 0" scale="0.86 0.5 0.33" material="side: double;" networked-video-source-green-screen="streamName: video; GreenThresholdIn:0.17"></a-plane>
+    </template>
+
+    <!-- Avatar -->
+    <template id="avatar-template">
+      <a-entity class="avatar" networked-audio-source scale="0.35 0.35 0.35">
+      </a-entity>
+    </template>
+
+    <!-- Bullet -->
+    <template id="bullet-template">
+      <a-entity>
+        <a-sphere class="bullet"
+          scale="0.1 0.1 0.1"
+          color="#fff"
+        ></a-sphere>
+      </a-entity>
+    </template>
+
+    <!-- Hands -->
+    <template id="left-hand-template">
+      <a-entity>
+        <a-gltf-model class="tracked-left-hand" rotation="0 0 90" src="#left-hand-model"></a-gltf-model>
+      </a-entity>
+    </template>
+
+    <template id="right-hand-template">
+      <a-entity>
+        <a-gltf-model class="tracked-right-hand" rotation="0 0 -90" src="#right-hand-model"></a-gltf-model>
+      </a-entity>
+    </template>
+
+  </a-assets>
+
+
+  <!-- Navigation Mesh -->
+  <a-entity id="navmesh" visible="false" nav-mesh position="0 1 0" gltf-model="#nav_mesh"></a-entity>
+
+  <a-entity id="camera-rig"
+            tracked-vr-device
+            networked="template:#camera-rig-template; attachTemplateToLocal:false;"
+            position="0 1.5 4"
+	          rotation="0 0 0"
+            movement-controls="constrainToNavMesh: true;">
+    <!-- Pawn -->
+
+    <a-entity id="player"
+            networked="template:#avatar-template; attachTemplateToLocal:false;"
+            camera="active:true; userHeight: 0; fov: 50; zoom: 1"
+            position="0 0 0" 
+            look-controls          
+            gun="bulletTemplate:#bullet-template"
+            >      
+    </a-entity> 
+  </a-entity>
+
+  <!-- Player streaming screen -->
+  <a-plane id="player_video_avatar"
+            networked="template:#screen-template; attachTemplateToLocal: false"             
+            visible="false" 
+            width="1.8"
+            height="1.8"
+            look-at="#player"
+            material="transparent:1; alphaTest:0.5; side: double" 
+            scale="0.86 0.5 0.33" 
+            position="0 1.41 -2.85" 
+            >
+  </a-plane>
+
+  <!-- Lights -->
+<a-entity light="intensity: 0.01; type: ambient" id="AmbientLight"></a-entity>
+  <!--<a-entity light="color: #fff; intensity: 1.6" position="0 2.3 5.2"></a-entity>-->
+  
+<a-entity id="studio" scale="0.01 0.01 0.01" position="0 0 0">
+<!-- Studio -->
+						
+<!--LightMapped objects-->
+		<a-entity obj-model="obj: #DeskObj"  id="Desk"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; metalness: 0.4; roughness: 0.3; sphericalEnvMap: #sky"></a-entity>
+	<a-entity obj-model="obj: #SittingAreaLightObj"  id="SittingAreaLight"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; src: #Wood; repeat: 6 6; shader: flat"></a-entity>
+	<a-entity obj-model="obj: #SittingAreaDarkObj"  id="SittingAreaDark"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #a6633f; metalness: 0.7; roughness: 0.3; sphericalEnvMap: #sky"></a-entity>
+	<a-entity obj-model="obj: #StageObj"  id="Stage"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; metalness: 0.4; roughness: 0.3; sphericalEnvMap: #sky"></a-entity>
+    <a-entity obj-model="obj: #FloorObj"  id="Floor"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; src: #Wood; repeat: 6 6; shader: flat"></a-entity>		
+	<a-entity obj-model="obj: #WallsObj"  id="Walls"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; shader: flat"></a-entity>
+	<a-entity obj-model="obj: #CeilingObj"  id="Ceiling"  light-map-geometry="path: /textures/Studio_v2/LectureHall_LM.jpg" material="color: #ffffff; shader: flat"></a-entity>
+	<!--Non-LightMapped objects-->
+	<a-entity obj-model="obj: /assets/Studio/BackScreen.obj"  id="BackScreen"  material="shader: flat; src: #wall-video; side: double"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DeskBanner.obj"  id="DeskBanner"  material="shader: flat; src: #DeskGradient_Agora"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame1.obj"  id="DigiFrame1"  material="color: #ffffff; shader: flat; src: #DigiFrame3"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame2.obj"  id="DigiFrame2"  material="color: #ffffff; shader: flat; src: #wall-video2"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame3.obj"  id="DigiFrame3"  material="color: #ffffff; shader: flat; src: #DigiFrame1"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame4.obj"  id="DigiFrame4"  material="color: #ffffff; shader: flat; src: #DigiFrame4"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame5.obj"  id="DigiFrame5"  material="color: #ffffff; shader: flat; src: #DigiFrame2"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame6.obj"  id="DigiFrame6"  material="color: #ffffff; shader: flat; src: #DigiFrame5"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame7.obj"  id="DigiFrame7"  material="color: #ffffff; shader: flat; src: #DigiFrame6"></a-entity>
+	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame8.obj"  id="DigiFrame8"  material="color: #ffffff; shader: flat; src: #DigiFrame8"></a-entity>
+</a-entity>	
+
+  <!-- Sky -->
+  <a-sky src="#sky2" position="0 5 0" rotation="0 100 0" radius="100"></a-sky>
+
+</a-scene>
+
+
+<!-- Preview what stream you send -->
+<div class="videoUI" style="display:none; text-align:center; color:white; position: absolute; ileft:-500px; ">
+
+  <div class="video-canvas-container">
+    <!-- Here we first put the data to process them -->
+    <canvas id="canvas_secret" class="output_canvas" width="800px" height="600px" style="width:160px; height:120px"></canvas>
+  </div>
+
+  <div iclass="video-canvas-container" style="width: 160px; height: 120px; margin-top: 17px; margin-left: 186px; border: 0px solid white;">
+    <!-- Here are the processed data -->
+    <div  style="display:none;" id="local-player" class="player"></div>
+    <!--<canvas id="video_output_canvas" class="output_canvas" width="800px" height="600px" style="width:160px; height:120px"></canvas>
+    -->
+  </div>
+  
+</div>
+
+	<script>
+		addControls();
+	</script>
+
+</body>
+</html>
