@@ -7,7 +7,7 @@ function onConnect(evt){
 		console.error('clientConnected event. clientID = ', clientID );
 	});	
 
-	function checkSeatNumEngaged(newSeatNum){
+	function seatNumEngaged(newSeatNum){
     	return document.querySelector(`.screenPlane[seat='${newSeatNum}'][visible='true']`);		
 	}
 
@@ -22,7 +22,7 @@ function onConnect(evt){
     		newSeatNum &&
     		user_seat !== newSeatNum &&
     		avatar_seat != newSeatNum &&
-    		!checkSeatNumEngaged(newSeatNum) &&
+    		!seatNumEngaged(newSeatNum) &&
     		newSeatNum <= max_seats
     		) {
     		createdElem.setAttribute('visible', true);

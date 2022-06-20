@@ -2,6 +2,8 @@ function showTextOnBlackScreen() {
     const enterText = document.createElement("h1");
     enterText.innerText = "Click to Enter";
     enterText.classList.add('enterText');
+    const loader = document.querySelector('.loader');
+    loader.style.display = 'none';
     document.body.appendChild(enterText);
 }
 
@@ -25,7 +27,9 @@ function enterScene() {
     // connect to network scene and start loading networked objects
     scene.emit('connect');
     try { 
-        startCall(); 
+        if (typeof startCall === 'function') {
+            startCall(); 
+        }
     } catch (e) { 
         console.error(e)
     }

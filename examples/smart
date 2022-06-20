@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <title></title>
 
-  <meta name="description" content="Dev Example — Networked-Aframe with Green Screen effect">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="https://trulience.com/sdk/trulience.sdk.js"></script>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="/dist/aframe-extras.min.js"></script>
   <script src="/public/js/aframe-chromakey-material2.min.js"></script>
@@ -21,9 +22,9 @@
   <script src="/js/gui_controls.js"></script>
   <script src="/js/black_screen.js"></script>
   <script src="/js/parseURL.js"></script>
+  <script src="/js/on-connect_vr.js"></script>
   <script src="/js/set_player_position.js"></script>
   <script src="/js/start_process_video.js"></script>
-  <script src="/js/on-connect_vr.js"></script>
   <script src="/js/dom_content_loaded.js"></script>
 
   <script>
@@ -107,6 +108,9 @@
   <script src="/js/forward.component.js"></script>
   <script src="/js/remove-in-seconds.component.js"></script>
   <script src="/js/light-map-geometry.js"></script>
+<script>
+
+</script>
 
   <link rel="stylesheet" type="text/css" href="./css/style.css" />
   <link rel="stylesheet" type="text/css" href="./css/adv-screen.css" />
@@ -114,7 +118,7 @@
 </head>
 <body>
   <!-- loading animation -->
-  <img class="loader" src="../assets/puff.svg" />
+  <img class="loader" src="./assets/puff.svg" />
 <input
       disabled
       id="username-overlay"
@@ -136,10 +140,10 @@
 	<img id="sky" src="./media/sky.jpg">
 	<img id="sky2" src="./media/sky2.jpg">
 	<img id="LM" src="./media/LectureHall_LM.jpg">
-	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video" autoplay loop="true" src="/public/video/video_wall9.mp4"> 
-	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video2" autoplay loop="true" src="/public/video/PacManVideo.mp4"> 
+	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video" autoplay loop="true" src="./media/videoBG1.mp4"> 
+        <video  webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video2" autoplay src="/public/video/PacManVideo.mp4"></video>
 	<img id="FloorPattern" src="./media/FloorPattern.png">
-	<img id="DeskGradient" src="https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/12/Gradient_builder_2.jpg">
+	<img id="DeskGradient" src="https://ak.picdn.net/shutterstock/videos/1067482190/thumb/1.jpg">
 	<img id="DeskLabels" src="./media/logo.png">
 	<img id="Wood" src="./media/Wood.jpg">
 	<img id="DigiFrame1" src="./media/frame1.jpg">
@@ -150,7 +154,7 @@
 	<img id="DigiFrame6" src="./media/frame6.jpg">	
 	<img id="DigiFrame7" src="./media/frame7.jpg">	
 	<img id="DigiFrame8" src="./media/frame8.jpg">	
-  
+
 	<!--LightMapped objects-->
 
 	<a-asset-item id="DeskObj" src="./assets/Desk.obj"></a-asset-item>
@@ -241,6 +245,18 @@
             >
   </a-plane>
 
+  <!-- Assistant streaming screen -->
+  <a-plane id="assistant_video_avatar"            
+            visible="false" 
+            width="1.8"
+            height="1.8"
+            look-at="#player"
+            material="transparent:1; alphaTest:0.5; side: double" 
+            scale="0.86 0.5 0.33" 
+            position="0 1.41 -2.85" 
+            >
+  </a-plane> 
+  
   <!-- Lights -->
 <a-entity light="intensity: 0.3; type: ambient" id="AmbientLight"></a-entity>
   <!--<a-entity light="color: #fff; intensity: 1.6" position="0 2.3 5.2"></a-entity>-->
@@ -260,25 +276,18 @@
 	<a-entity obj-model="obj: ./assets/BackScreen.obj"  id="BackScreen"  material="shader: flat; src: #wall-video; side: double"></a-entity>
 	<a-entity obj-model="obj: ./assets/DeskBannerGeneric.obj"  id="DeskBanner"  material="shader: flat; src: #DeskGradient"></a-entity>
 	<a-entity obj-model="obj: ./assets/DeskLabels.obj"  id="DeskLabels"  material="shader: flat; src: #DeskLabels; transparent: true"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame1.obj"  id="DigiFrame1"  material="color: #ffffff; shader: flat; src: #DigiFrame3"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame2.obj"  id="DigiFrame2"  material="color: #ffffff; shader: flat; src: #DigiFrame7"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame3.obj"  id="DigiFrame3"  material="color: #ffffff; shader: flat; src: #DigiFrame1"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame4.obj"  id="DigiFrame4"  material="color: #ffffff; shader: flat; src: #DigiFrame4"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame5.obj"  id="DigiFrame5"  material="color: #ffffff; shader: flat; src: #DigiFrame2"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame6.obj"  id="DigiFrame6"  material="color: #ffffff; shader: flat; src: #DigiFrame5"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame7.obj"  id="DigiFrame7"  material="color: #ffffff; shader: flat; src: #DigiFrame6"></a-entity>
-	<a-entity obj-model="obj: ./assets/DigiFrame8.obj"  id="DigiFrame8"  material="color: #ffffff; shader: flat; src: #DigiFrame8"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame1.obj"  id="DigiFrame1"  material="color: #ffffff; shader: flat; src: #DigiFrame1"></a-entity>
+   	<a-entity obj-model="obj: /assets/Studio_v2/DigiFrame2.obj"  id="DigiFrame2"  material="color: #ffffff; shader: flat; src: #wall-video2"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame3.obj"  id="DigiFrame3"  material="color: #ffffff; shader: flat; src: #DigiFrame3"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame4.obj"  id="DigiFrame4"  material="color: #ffffff; shader: flat; src: #DigiFrame1"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame5.obj"  id="DigiFrame5"  material="color: #ffffff; shader: flat; src: #DigiFrame8"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame6.obj"  id="DigiFrame6"  material="color: #ffffff; shader: flat; src: #DigiFrame2"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame7.obj"  id="DigiFrame7"  material="color: #ffffff; shader: flat; src: #DigiFrame7"></a-entity>
+	<a-entity obj-model="obj: ./assets/DigiFrame8.obj"  id="DigiFrame8"  material="color: #ffffff; shader: flat; src: #DigiFrame2"></a-entity>
 </a-entity>	
-
 
   <!-- Sky -->
   <a-sky src="#sky2" position="0 5 0" rotation="0 100 0" radius="100"></a-sky>
-  <!-- position="0 4 0" rotation="0 -120 0" -->
-
-  <!-- room -->
-  <!--a-entity id="room" gltf-model="#meeting-room" cube-env-map="path: /public/img/map/;
-                        extension: hdr;
-                        reflectivity: 1;" position="0 0 0" set-metalness-roughness></a-entity-->
 
 </a-scene>
 
@@ -303,6 +312,74 @@
 	<script>
 		addControls();
 	</script>
+    <script>
+        let trl = null;
 
+        pageOnloadHandler = (retry) => {
+            a1 = (resp) => {
+                    // autoconnect
+               // trl.connectGateway()
+            }
+
+            let authEventsCB = {
+                onReady: a1
+            }
+
+            let wsEventsCB = {
+            }
+
+            let mediaEventsCB = {
+            }
+
+            //const assistant_video = document.createElement('video');
+            //assistant_video.setAttribute('id', 'assistant_video_player');
+
+            let videoElements = {
+                //remoteVideo: 'assistant_video_player',
+                remoteVideo: 'wall-video2',
+            }
+
+            var vps = null;
+            var webrtc = null;
+            var forceVideo = null;
+            var _userId = null;
+            var avatarId = '1490274997962426858'; //Default Avatar Id = 10 = ECHO_TEST
+
+            //if avatar has oauth enabled then it will be checked on sdk load
+                                                                                          
+		            trl = Trulience.Builder()
+                .setAvatarId(avatarId) // Setting as String as Long values are truncated in JavaScript
+                .setUserId(_userId)
+                .setLanguagePreference('en-US')
+                .setUserName('Guest')
+                .assignVPS(vps)
+                .enableAvatar(true)  // false for chat only, true for chat and video avatar
+                .setAuthCallbacks(authEventsCB)
+                .setWebSocketCallbacks(wsEventsCB)
+                .setMediaCallbacks(mediaEventsCB)
+                .setScreenId('voice-textarea-id')
+                .setRetry(retry)
+                .registerVideoElements(videoElements)
+                .setWebRTCServer(webrtc)
+                .forceVideo(forceVideo)
+                .build();
+                trl.authenticate();
+        };
+
+        window.onload = () => pageOnloadHandler(false);
+
+        window.onunload = function () {
+            trl.disconnectGateway();
+        }
+
+        function startCall() {
+            trl.connectGateway();
+        }
+
+        function endCall(reason) {
+            trl.disconnectGateway(reason);
+        }
+
+    </script>
 </body>
 </html>
