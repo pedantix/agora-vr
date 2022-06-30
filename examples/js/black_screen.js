@@ -22,7 +22,11 @@ function enterScene() {
     var video = videoEl.components.material.material.map.image;
     if (!video) { return; }
     enterText.parentNode.removeChild(enterText);    
+
+    try { 
     video.play();
+    } catch (e) { 
+    }
     
     // connect to network scene and start loading networked objects
     scene.emit('connect');

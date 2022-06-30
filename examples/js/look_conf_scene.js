@@ -179,18 +179,31 @@
 	    // some trick to prevent rotate object by x axis
 	    vector.y = object3D.position.y;
 
-	    //console.log(" lookAt ", position, vector);
-
-	    const user_seat_mid = (this.el.getAttribute('seat') - 3) / 2;
+	    //console.error("max_seats: ", max_seats);
+	    const el_seat = this.el.getAttribute('seat');
+	    const user_seat_mid = (el_seat - Math.ceil(max_seats/2)) / 2;
 	    const x_bord = [object3D.position.x - 1 - Math.max(0, user_seat_mid), 
 	    				object3D.position.x + 1 - Math.min(0, user_seat_mid)];
+	    //const object3D_position_z_add = 0.3;
 	    if (vector.x > object3D.position.x + 1) {
 	    	vector.x = x_bord[1];
+	    	/*if (el_seat == 0 || el_seat == max_seats) {
+	    		vector.x -= 1;
+	    	}*/
 	    	vector.z = 2;
 	    } else if (vector.x < object3D.position.x - 1) {
 	    	vector.x = x_bord[0];
+	    	/*if (el_seat == 0 || el_seat == max_seats) {
+	    		vector.x += 1;
+	    	}*/
 	    	vector.z = 2;	    	
-	    }
+	    }/* else if (vector.z - object3D.position.z < 10) {
+	    	//console.error(vector.z - object3D.position.z, (vector.z - object3D.position.z)/5);
+	    	const coef_z = (vector.z - object3D.position.z - 5) / 5;
+	    	console.error(object3D.position.z, coef_z, coef_z * 0.3)
+	    	object3D.position.z = object3D.position.z + coef_z * 0.3;
+	    }*/
+
 	    //window.s = user_seat_mid;
 	    //window.tar = vector;
 	    //window.ob = object3D.position;

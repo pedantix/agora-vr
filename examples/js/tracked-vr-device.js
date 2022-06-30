@@ -5,9 +5,10 @@ AFRAME.registerComponent('tracked-vr-device', {
     
     const el = document.createElement('a-entity');
     el.removeAttribute('networked');
-    el.setAttribute('networked', {template: `#camera-rig-template-oculus`, attachTemplateToLocal: false});
+    el.setAttribute('networked', 'template:#camera-rig-template-oculus; attachTemplateToLocal:false');
+    el.setAttribute('position', '0 1.5 4');    
     console.error(el)
-    el.setAttribute('id', `my-tracked-vr-device`);
+    el.setAttribute('id', 'my-tracked-vr-device');
     // note that the ID will be applied to THIS client's avatar,
     // but not other connected clients,
     // and not on the machine of other connected clients
