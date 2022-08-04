@@ -1,3 +1,6 @@
+body {
+    background-color: #000;
+}
 #video_preview
 {
     transform: rotateY(180deg);
@@ -14,7 +17,26 @@
     pointer-events: none;
     z-index:999;
 }
-
+#scene {
+    display:  none;
+}
+.loader,
+.enterText {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);   
+}
+.enterText {
+    font-family: 'Lucida Grande', sans-serif;
+    font=font-weight: normal;
+    cursor: pointer;
+    color: #fff;
+}
+.a-enter-vr,
+.close-bottom {
+    display: none;
+}
 .videoUI {
     position: fixed;
     bottom: 10px;
@@ -25,7 +47,6 @@
     opacity:1.0;
     pointer-events: none; /* allow click-through in transparent areas */
 }
-
 
 #live_label{
     display: flex;

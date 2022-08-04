@@ -20,6 +20,43 @@
   <script src="/dist/networked-aframe.js"></script>
   <script src="/js/gui_controls.js"></script>
   <script src="/js/black_screen.js"></script>
+
+  <script>
+    const userPositionGroups = {
+    1: {
+      1: {x: 0, y: 1.49, z: -1.64}
+    },
+    2: {
+      1: {x: -1.25, y: 1.49, z: -1.65},
+      2: {x: 1.25, y: 1.49, z: -1.65}
+    },
+    3: {
+      1: {x: -1.74, y: 1.49, z: -1.65},
+      2: {x: 0, y: 1.49, z: -1.66}, 
+      3: {x: 1.74, y: 1.49, z: -1.65}
+    },
+    4: {
+      1: {x: -2.33, y: 1.455, z: -1.65},
+      2: {x: -0.78, y: 1.455, z: -1.65}, 
+      3: {x: 0.78, y: 1.455, z: -1.65},
+      4: {x: 2.33, y: 1.455, z: -1.65}
+    },
+    5: {
+        1: {x: -2.32, y: 1.41, z: -1.65},
+        2: {x: -1.16, y: 1.41, z: -1.65}, 
+        3: {x: 0, y: 1.41, z: -1.65},
+        4: {x: 1.16, y: 1.41, z: -1.65}, 
+        5: {x: 2.32, y: 1.41, z: -1.65} 
+    }
+  };
+  const userVideoSizes = {
+    1: 1.8,
+    2: 1.8,
+    3: 1.8,
+    4: 1.7,
+    5: 1.5
+  }  
+  </script>
   <script src="/js/parseURL.js"></script>
   <script src="/js/set_player_position.js"></script>
   <script src="/js/start_process_video.js"></script>
@@ -135,8 +172,9 @@
     <!--Textures Used-->
 	<img id="sky" src="./media/sky.jpg">
 	<img id="sky2" src="./media/sky2.jpg">
-	<img id="LM" src="./media/LectureHall_LM_NoPlatform_NoPlatform.jpg">
+	<img id="LM" src="./media/LectureHall_LM_NoPlatform.jpg">
 	<img id="BGPattern" src="./media/BGPattern.jpg">
+	<img id="DeskGradient" src="./media/DeskGradient.jpg">
 	<video muted webkit-playsinline playsinline crossorigin="use-credentials" id="wall-video2" autoplay loop="true" src="./media/PacManVideo.mp4"> 
 	<img id="Wood" src="./media/Wood.jpg">
 	<img id="DigiFrame1" src="./media/GamePoster1.jpg">
@@ -150,7 +188,8 @@
   
 	<!--LightMapped objects-->
 
-	<a-asset-item id="DeskObj" src="./assets/Desk_v02.obj"></a-asset-item>
+	<a-asset-item id="DeskObj" src="./assets/Desk_v02_1.obj"></a-asset-item>
+	<a-asset-item id="DeskBannerObj" src="./assets/Desk_v02_1_Banner.obj"></a-asset-item>
 	<a-asset-item id="FloorObj" src="./assets/Floor.obj"></a-asset-item>
 	<a-asset-item id="SittingAreaLightObj" src="./assets/SittingAreaLight.obj"></a-asset-item>
 	<a-asset-item id="SittingAreaDarkObj" src="./assets/SittingAreaDark.obj"></a-asset-item>
@@ -180,7 +219,7 @@
 
     <!-- My streming screen plane -->
     <template id="screen-template">
-      <a-plane class="screenPlane" visible="false" look-at="#player" position="0 0 0" scale="0.86 0.5 0.33" material="side: double;" networked-video-source-green-screen="streamName: video; GreenThresholdIn:0.17"></a-plane>
+      <a-plane class="screenPlane" visible="false" look-at="#player" position="0 0 0" scale="0.86 0.6 0.33" material="side: double;" networked-video-source-green-screen="streamName: video; GreenThresholdIn:0.17"></a-plane>
     </template>
 
     <!-- Avatar -->
@@ -233,20 +272,26 @@
             height="1.8"
             look-at="#player"
             material="transparent:1; alphaTest:0.5; side: double" 
-            scale="0.86 0.5 0.33" 
+            scale="0.86 0.6 0.33" 
             position="0 1.41 -2.85" 
             >
   </a-plane>
 
   <!-- Lights -->
 <a-entity light="intensity: 0.3; type: ambient" id="AmbientLight"></a-entity>
+<!--a-entity id="BackgroundSpotLight" light="color: #fed886; penumbra: 0.1; intensity : 0.4; type: spot; distance: 9.5; decay: 1" position="0 3.814 0.119" rotation="20 0 0" visible=""></a-entity-->
+<a-entity id="DeskSpotLight" light="color: #fed886; penumbra: 0.02; intensity : 2; type: spot; distance: 8; decay: 1" position="0 4.92 1.94" rotation="-1.67 0 0" visible=""></a-entity>
+<a-entity id="BackgroundSpotLight1" light="color: #fed886; penumbra: 0.15; angle: 35; intensity : 0.65; type: spot; distance: 9.7; decay: 1" position="0 6.184 -4.384" rotation="-55 0 0" visible=""></a-entity>
+<a-entity id="BackgroundSpotLight2" light="color: #fed886; penumbra: 0.15; angle: 35; intensity : 0.65; type: spot; distance: 9.7; decay: 1" position="6.85 6.184 -1.75" rotation="-55 0 0" visible=""></a-entity>
+<a-entity id="BackgroundSpotLight3" light="color: #fed886; penumbra: 0.15; angle: 35; intensity : 0.65; type: spot; distance: 9.7; decay: 1" position="-6.85 6.184 -1.75" rotation="-55 0 0" visible=""></a-entity>
   <!--<a-entity light="color: #fff; intensity: 1.6" position="0 2.3 5.2"></a-entity>-->
   
 <a-entity id="studio" scale="0.01 0.01 0.01" position="0 0 0">
 <!-- Studio -->
 						
 <!--LightMapped objects-->
-		<a-entity obj-model="obj: #DeskObj"  id="Desk"  material="color: #ffffff; metalness: 0.4; roughness: 0.3; emissive:#5B5B5B; sphericalEnvMap: #sky"></a-entity>
+	<a-entity obj-model="obj: #DeskObj"  id="Desk"  material="color: #ffffff; metalness: 0.4; roughness: 0.3; emissive:#5B5B5B; sphericalEnvMap: #sky"></a-entity>
+	<a-entity obj-model="obj: #DeskBannerObj"  id="DeskBanner"  material="src: #DeskGradient; metalness: 0.4; roughness: 0.3; emissive:#4A4A4A; sphericalEnvMap: #sky"></a-entity>		
 	<a-entity obj-model="obj: #SittingAreaLightObj"  id="SittingAreaLight"  light-map-geometry="path: ./media/LectureHall_LM_NoPlatform.jpg" material="color: #ffffff; src: #Wood; repeat: 6 6; shader: flat"></a-entity>
 	<a-entity obj-model="obj: #SittingAreaDarkObj"  id="SittingAreaDark"  light-map-geometry="path: ./media/LectureHall_LM_NoPlatform.jpg" material="color: #a6633f; metalness: 0.7; roughness: 0.3; sphericalEnvMap: #sky"></a-entity>
 	<!--a-entity obj-model="obj: #StageObj"  id="Stage"  light-map-geometry="path: ./media/LectureHall_LM_NoPlatform.jpg" material="color: #ffffff; metalness: 0.4; roughness: 0.3; sphericalEnvMap: #sky"></a-entity-->
@@ -254,7 +299,7 @@
 	<a-entity obj-model="obj: #WallsObj"  id="Walls"  light-map-geometry="path: ./media/LectureHall_LM_NoPlatform.jpg" material="color: #ffffff; shader: flat"></a-entity>
 	<a-entity obj-model="obj: #CeilingObj"  id="Ceiling"  light-map-geometry="path: ./media/LectureHall_LM_NoPlatform.jpg" material="color: #ffffff; shader: flat"></a-entity>
 	<!--Non-LightMapped objects-->
-	<a-entity obj-model="obj: ./assets/BackScreen.obj"  id="BackScreen"  material="shader: flat; src: #BGPattern; repeat: 1 1; side: double"></a-entity>
+	<a-entity obj-model="obj: ./assets/BackScreen.obj"  id="BackScreen"  light-map-geometry="path: ./media/Flat_LM.jpg" material="src: #BGPattern; repeat: 10 10; side: double"></a-entity>
 	<!--a-entity obj-model="obj: ./assets/DeskBannerGeneric.obj"  id="DeskBanner"  material="shader: flat; src: #DeskGradient"></a-entity-->
 	<!--a-entity obj-model="obj: ./assets/DeskLabels.obj"  id="DeskLabels"  material="shader: flat; src: #DeskLabels; transparent: true"></a-entity-->
 	<a-entity obj-model="obj: ./assets/DigiFrame1.obj"  id="DigiFrame1"  material="color: #ffffff; shader: flat; src: #DigiFrame3"></a-entity>

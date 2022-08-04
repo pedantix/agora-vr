@@ -26,7 +26,6 @@ function startProcessVideo() {
 	(function loop() {
 	        canvasCtxSecret.drawImage(myvideo, 0, 0, 800, 600);
 	        requestAnimationFrame(loop);
-	        //setTimeout(loop, 1000 / 30); // drawing at 30fps
 	   }
 	)();	
 }

@@ -30,6 +30,8 @@ function enterScene() {
     
     // connect to network scene and start loading networked objects
     scene.emit('connect');
+    addControls();
+
     try { 
         if (typeof startCall === 'function') {
             startCall(); 

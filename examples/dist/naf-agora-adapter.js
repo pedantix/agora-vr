@@ -293,7 +293,6 @@ class AgoraRtcAdapter {
   }
 
   broadcastData(dataType, data) {
-    console.log("BW73 broadcastData ", dataType, data);
     var roomOccupants = this.easyrtc.getRoomOccupantsAsMap(this.room);
 
     // Iterate over the keys of the easyrtc room occupants map.
@@ -307,7 +306,6 @@ class AgoraRtcAdapter {
   }
 
   broadcastDataGuaranteed(dataType, data) {
-    console.log("BW73 broadcastDataGuaranteed ", dataType, data);
     var destination = { targetRoom: this.room };
     this.easyrtc.sendDataWS(destination, dataType, data);
   }

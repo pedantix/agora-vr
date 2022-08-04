@@ -12,7 +12,7 @@ function parseURL() {
 	
 	if (seatNums.length && seatNums.includes(searchParams.get("seat"))){
 		user_seat = searchParams.get("seat");
-		addControls();
+		//addControls();
 	}
 	if (searchParams.get("room")) {
 		room = searchParams.get("room");

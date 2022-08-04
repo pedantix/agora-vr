@@ -21,15 +21,18 @@ body {
 #scene {
     display:  none;
 }
+.loader,
+.enterText {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);   
+}
 .enterText {
     font-family: 'Lucida Grande', sans-serif;
     font=font-weight: normal;
     cursor: pointer;
     color: #fff;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
 }
 .a-enter-vr,
 .close-bottom {

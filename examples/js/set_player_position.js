@@ -11,6 +11,7 @@ function sitOnChair(seat_num, video_elem, player_avatar, blue_color) {
 		player_avatar.setAttribute('material', 'color', '0 0.03 0.99');
 		console.error(player_avatar)
 	}
+
 	player_avatar.setAttribute('material', 'shader', 'chromakey');
 	player_avatar.setAttribute('material', 'alphaTest', '0.5');
 	// delay to prevent show background of user video
@@ -18,6 +19,11 @@ function sitOnChair(seat_num, video_elem, player_avatar, blue_color) {
 		player_avatar.setAttribute('visible', true);
 	}, 2000);
 
+	const avatart_material = player_avatar_obj.children[0].material;
+	avatart_material.needsUpdate = true;
+	avatart_material.metalness = 0.7;
+	avatart_material.lights = true;
+	player_avatar_obj.children[0].castShadow = true;
 	player_avatar_obj.position.set(posArr.x, posArr.y, posArr.z);
 }
 
