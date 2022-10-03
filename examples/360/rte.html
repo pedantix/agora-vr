@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title></title>
+  <script src="/public/js/aframe.min.js"></script>
+  <script src="/public/js/aframe-chromakey-material.min.js"></script>
+  <script src="/public/js/play-on-window-click2.js"></script>
+  <script src="/public/js/play-on-vrdisplayactivate-or-enter-vr.js"></script>
+  <script src="/public/js/hide-once-playing2.js"></script>
+   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <script src="/js/parseURL.js"></script>
+
+</head>
+<body>
+
+  <a-scene>
+    <a-assets>
+      <video id="video"
+               loop crossorigin="anonymous" playsinline webkit-playsinline>
+          <!-- MP4 video source. -->
+          <source type="video/mp4"
+               src="" />
+      </video>
+      
+    </a-assets>
+
+    <!-- Define camera with user height, movement control and arrow key rotation added. -->
+    <a-camera look-controls arrow-key-rotation>
+      <!-- Text element for display messaging.  Hide once video is playing. -->
+      <a-entity id="msg" position="0 -0.3 -1.5" text="align:center; 
+                width:6;
+                wrapCount:100;
+                color:white;
+                value:Click to enter"
+                hide-once-playing="#video">
+      </a-entity>
+    </a-camera>  
+    </a-entity>
+    <a-videosphere rotation="0 180 0" src="#video" radius="4200"
+                     play-on-window-click
+                     play-on-vrdisplayactivate-or-enter-vr>
+    </a-videosphere>
+    <a-entity light="color: #ccccff; intensity: 0.5; type: ambient;" visible="true"></a-entity>
+    <a-entity light="color: #f8ffc2; intensity: 0.82; castShadow: false" position="2.69 7.89 -0.13" rotation="0 0.01 0"></a-entity>
+  </a-scene>
+
+	<script>
+
+        const paramsString = document.location.search;
+        const searchParams = new URLSearchParams(paramsString);
+
+	var appid='20b7c51ff4c644ab80cf5a4e646b0537';
+	var room='vr360';
+	var token=null;
+	var clientId=null;
+        var agoraClient=AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+	async function agora() {
+
+        agoraClient.on("user-joined", async (user) => {
+           console.warn("user-joined",user);
+        });
+
+        agoraClient.on("user-published", async (user, mediaType) => {
+           await agoraClient.subscribe(user, mediaType);
+           if (mediaType === 'audio') {
+              user.audioTrack.play();
+           }
+           if (mediaType === 'video') {
+              var videoStream = new MediaStream();
+              videoStream.addTrack(user.videoTrack._mediaStreamTrack);
+              document.querySelector("#video").srcObject=videoStream;
+              document.querySelector("#video").play();
+           }
+           if (mediaType === 'audio') {
+              user.audioTrack.play();
+           }
+        });
+
+            await agoraClient.join(appid, room, token || null, clientId || null);
+            var audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            await agoraClient.publish([audioTrack]);
+
+	}
+	agora();
+
+	</script>
+</body>
+</html>
