@@ -80,8 +80,8 @@
         });
 
             await agoraClient.join(appid, room, token || null, clientId || null);
-            var audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            await agoraClient.publish([audioTrack]);
+            //var audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            //await agoraClient.publish([audioTrack]);
 
 	}
 	agora();
