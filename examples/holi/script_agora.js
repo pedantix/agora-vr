@@ -14,6 +14,7 @@ function getParameterByName(name, url = window.location.href) {
 var appid = getParameterByName("appid");// "20b7c51ff4c644ab80cf5a4e646b0537";
 var room = getParameterByName("channel");
 var clientId =  getParameterByName("uid");
+var token = null;
 var agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
 async function agoraPublish() {
