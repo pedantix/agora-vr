@@ -184,6 +184,21 @@ function onResults(results) {
         if (results.za) {
             setPose(results.poseLandmarks, results.za);
         }
+
+        let leftHandLandmarks = results.leftHandLandmarks;
+        if (leftHandLandmarks) {
+            setFingers(leftHandLandmarks, false);
+        }
+    
+        let rightHandLandmarks = results.rightHandLandmarks;
+        if (rightHandLandmarks) {
+            setFingers(rightHandLandmarks, true);
+        }
+    
+        let faceLandmarks = results.faceLandmarks;
+        if (faceLandmarks) {
+            setMorphs(faceLandmarks);
+        }
     }
     canvasCtx.restore();
 }

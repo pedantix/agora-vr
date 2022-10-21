@@ -8,7 +8,7 @@ export function Grid(worldDim) {
     let world = new THREE.Object3D();
 
     // lights
-    const amLight = new THREE.AmbientLight(0xFFFFFF, 0.2);
+    const amLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
     world.add(amLight);
 
     const dirLight = new THREE.DirectionalLight(0xFFFFFF);

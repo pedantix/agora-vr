@@ -1,5 +1,4 @@
 
-
 import  * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 
 // device constants
@@ -24,8 +23,8 @@ const LEFTHIP = 23;
 const RIGHTHIP = 24;
 const LEFTKNEE = 25;
 const RIGHTKNEE = 26;
-const LEFTANKLE = 27;
-const RIGHTANKLE = 28;
+const LEFTANKLE = 31;// 27;
+const RIGHTANKLE = 32;// 28;
 const LEFTFOOT = 31;
 const RIGHTFOOT = 32;
 
@@ -250,12 +249,14 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         skeleton.position.x = (1 - SMOOTHING) * skeleton.position.x + SMOOTHING * percentX * -1000;
 
         // TODO: z direction movement
-        // let shoulderLen = LH.distanceTo(RH);
-        // let angleY = Math.atan2(shoulderX.z, shoulderX.x);
-        // shoulderLen /= Math.abs(Math.cos(angleY));  // BUG: division by 0
-        // let precentZ = interpolate(shoulderLen, 550, 150);
-        // skeleton.position.z = precentZ * -1000;
-
+        /*
+        let shoulderX = userJoints[RIGHTSHOULDER].clone().sub(userJoints[LEFTSHOULDER]).normalize();
+        let shoulderLen = LH.distanceTo(RH);
+        let angleY = Math.atan2(shoulderX.z, shoulderX.x);
+        shoulderLen /= Math.abs(Math.cos(angleY));  // BUG: division by 0
+        let precentZ = interpolate(shoulderLen, 550, 150);
+        skeleton.position.z = precentZ * -1000;
+        */
         // left leg
         let xAxis = hipX.clone();
         let yAxis = hipY.clone();
@@ -274,8 +275,8 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         leftKneeBone.quaternion.slerp(rot, SMOOTHING);
         updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
-        leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
+        //rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
+        //leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
 
         // right leg
         xAxis = hipX.clone();
@@ -295,8 +296,8 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         rightKneeBone.quaternion.slerp(rot, SMOOTHING);
         updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
-        rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+        //rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
+        //rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
     } else {
         // reset legs
         leftHipBone.quaternion.identity();
