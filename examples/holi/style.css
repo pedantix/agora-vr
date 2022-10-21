@@ -58,16 +58,27 @@ body {
   display: flex;
   height: 100%;
   width: 100%;
-  justify-content: center;
   align-items: center;
 }
 
 .output_canvas {
-  max-width: 100%;
-  display: block;
-  position: relative;
-  left: 0;
-  top: 0;
+  display: inline-block;
+  width:50%;
+}
+
+.avatar_canvas {
+  display: inline-block;
+  width:50%;
+  background-color: #44bb44;
+}
+
+.button_bar {  
+  display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+  padding: 2px;
 }
 
 .logo {
@@ -89,7 +100,7 @@ body {
 .control-panel {
   position: absolute;
   left: 10px;
-  top: 10px;
+  top: 24px;
 }
 
 .loading {
