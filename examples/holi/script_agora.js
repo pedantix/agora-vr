@@ -1,8 +1,19 @@
-var appid = "20b7c51ff4c644ab80cf5a4e646b0537";
-var room = "mocap";
-var user = "load_user";
-var token = null;
-var clientId = null;
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    var ret= decodeURIComponent(results[2].replace(/\+/g, ' '));
+    if (ret && ret.length>0)
+      return ret;
+    else
+      return null;
+  }
+
+var appid = getParameterByName("appid");// "20b7c51ff4c644ab80cf5a4e646b0537";
+var room = getParameterByName("channel");
+var clientId =  getParameterByName("uid");
 var agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
 async function agoraPublish() {
