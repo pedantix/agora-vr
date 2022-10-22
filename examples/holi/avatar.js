@@ -1,11 +1,16 @@
 
-import  * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+
+// coordinates in page 
+// world position based on centre of hips 
+
 
 // device constants
 const WIDTH = 1920;
 const HEIGHT = 1080;
 
-const SMOOTHING = 0.25;
+const SMOOTHING = 0.75;
+const SMOOTHING2 = 0.1;
 const VISTHRESH = 0.9;
 
 // pose constants
@@ -23,8 +28,8 @@ const LEFTHIP = 23;
 const RIGHTHIP = 24;
 const LEFTKNEE = 25;
 const RIGHTKNEE = 26;
-const LEFTANKLE = 31;// 27;
-const RIGHTANKLE = 32;// 28;
+const LEFTANKLE = 29; //27;
+const RIGHTANKLE = 30; //28;
 const LEFTFOOT = 31;
 const RIGHTFOOT = 32;
 
@@ -49,10 +54,11 @@ let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightK
 let leftHandBones, rightHandBones;
 
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
-
+window.avatar;
+window.skel = -1111;
 export async function Avatar(name, loader) {
     let avatar = await loader.loadAsync(`${name}.fbx`);
-    
+    window.avatar = avatar;
     // Skinned Mesh
     let skinnedMesh = avatar.getObjectByName("Body");
     if (skinnedMesh) {
@@ -138,7 +144,7 @@ export async function Avatar(name, loader) {
         }
     });
 
-    avatar.traverse(function(child) {
+    avatar.traverse(function (child) {
         if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
@@ -150,14 +156,38 @@ export async function Avatar(name, loader) {
 
 export function setPose(poseLandmarks, poseWorldLandmarks) {
     let userJoints = [];
+
     poseWorldLandmarks.forEach((landmark) => {
         userJoints.push(new THREE.Vector3(landmark.x, landmark.y, landmark.z).negate());
+        
     });
 
     let rightShoulderVis = poseWorldLandmarks[RIGHTSHOULDER].visibility;
     let leftShoulderVis = poseWorldLandmarks[LEFTSHOULDER].visibility;
     let rightHipVis = poseWorldLandmarks[RIGHTHIP].visibility;
     let leftHipVis = poseWorldLandmarks[LEFTHIP].visibility;
+
+
+
+    /*
+    log("pw  LEFTSHOULDER x ", (poseWorldLandmarks[LEFTSHOULDER].x-poseLandmarks[LEFTSHOULDER].x));
+ console.log("pw  LEFTSHOULDER y ", (poseWorldLandmarks[LEFTSHOULDER].y-poseLandmarks[LEFTSHOULDER].y));
+ console.log("pw  LEFTSHOULDER z ", (poseWorldLandmarks[LEFTSHOULDER].z-poseLandmarks[LEFTSHOULDER].z));
+
+ //console.log("p  LEFTSHOULDER", poseLandmarks[LEFTSHOULDER],poseWorldLandmarks[LEFTSHOULDER]);
+ 
+ console.log("pw  LEFTSHOULDER", poseWorldLandmarks[LEFTSHOULDER]);
+ console.log("pw       LEFTHIP", poseWorldLandmarks[LEFTHIP]);
+ console.log("pw      LEFTFOOT", poseWorldLandmarks[LEFTFOOT]);
+ console.log("p  LEFTSHOULDER", poseLandmarks[LEFTSHOULDER]);
+ console.log("p       LEFTHIP", poseLandmarks[LEFTHIP]);
+ console.log("p      LEFTFOOT", poseLandmarks[LEFTFOOT]);
+
+ console.log(" ");
+*/
+    //, poseWorldLandmarks[LEFTHIP], poseWorldLandmarks[LEFTFOOT]);
+    //console.log("p ", poseLandmarks[LEFTSHOULDER], poseLandmarks[LEFTHIP], poseLandmarks[LEFTFOOT]);
+
 
     // REQUIRED: both shoulders must be visible to track upperbody
     if (rightShoulderVis > VISTHRESH && leftShoulderVis > VISTHRESH) {
@@ -222,11 +252,13 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         let rightFingersUser = userJoints[RIGHTPINKY].lerp(userJoints[RIGHTINDEX], 0.5);
         let rightFingersAvatar = rightHandBones[PINKY1].position.clone().lerp(rightHandBones[INDEX1].position, 0.5);
         rot = rotateBone(userJoints[RIGHTWRIST], rightFingersUser, rightFingersAvatar, basis);
-        rightWristBone.quaternion.slerp(rot, SMOOTHING);
+        rightWristBone.quaternion.slerp(rot, 1);
     }
 
     // REQUIRED: both hips must be visible to track lowerbody
     if (rightHipVis > VISTHRESH && leftHipVis > VISTHRESH) {
+
+
         // hip local coordinate system
         // positive directions: x - leftHip -> rightHip,
         //                      y - hip -> shoulder,
@@ -245,59 +277,62 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         let LH = new THREE.Vector3(poseLandmarks[LEFTHIP].x * WIDTH, poseLandmarks[LEFTHIP].y * HEIGHT);
         let RH = new THREE.Vector3(poseLandmarks[RIGHTHIP].x * WIDTH, poseLandmarks[RIGHTHIP].y * HEIGHT);
 
+        console.log("l -r  ", poseWorldLandmarks[LEFTFOOT].y - poseWorldLandmarks[RIGHTFOOT].y);
+
         let percentX = LH.lerp(RH, 0.5).x / WIDTH - 0.5;
-        skeleton.position.x = (1 - SMOOTHING) * skeleton.position.x + SMOOTHING * percentX * -1000;
+        skeleton.position.x = 0.95 * skeleton.position.x + 0.05 * percentX * -1000;
 
-        // TODO: z direction movement
-        /*
-        let shoulderX = userJoints[RIGHTSHOULDER].clone().sub(userJoints[LEFTSHOULDER]).normalize();
-        let shoulderLen = LH.distanceTo(RH);
-        let angleY = Math.atan2(shoulderX.z, shoulderX.x);
-        shoulderLen /= Math.abs(Math.cos(angleY));  // BUG: division by 0
-        let precentZ = interpolate(shoulderLen, 550, 150);
-        skeleton.position.z = precentZ * -1000;
-        */
-        // left leg
-        let xAxis = hipX.clone();
-        let yAxis = hipY.clone();
-        let zAxis = hipZ.clone();
-        let basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+        // abs > 0.1
+        if ((poseWorldLandmarks[LEFTFOOT].y < poseWorldLandmarks[RIGHTFOOT].y) && (poseWorldLandmarks[RIGHTFOOT].y - poseWorldLandmarks[LEFTFOOT].y)>0.1) {
+            // left leg
+            rightHipBone.quaternion.identity();
+            rightKneeBone.quaternion.identity();
+            rightAnkleBone.quaternion.identity();
 
-        let rot = rotateBone(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKneeBone.position, basis);
-        leftHipBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+            let xAxis = hipX.clone();
+            let yAxis = hipY.clone();
+            let zAxis = hipZ.clone();
+            let basis = new THREE.Matrix3().set(
+                xAxis.x, yAxis.x, zAxis.x,
+                xAxis.y, yAxis.y, zAxis.y,
+                xAxis.z, yAxis.z, zAxis.z
+            );
 
-        rot = rotateBone(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkleBone.position, basis);
-        leftKneeBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+            let rot = rotateBone(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKneeBone.position, basis);
+            leftHipBone.quaternion.slerp(rot, SMOOTHING);
+            updateBasis(leftHipBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        //rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
-        //leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
+            rot = rotateBone(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkleBone.position, basis);
+            leftKneeBone.quaternion.slerp(rot, SMOOTHING);
+            updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        // right leg
-        xAxis = hipX.clone();
-        yAxis = hipY.clone();
-        zAxis = hipZ.clone();
-        basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+            rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
+            leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
+        } else {
+            leftHipBone.quaternion.identity();
+            leftKneeBone.quaternion.identity();
+            leftAnkleBone.quaternion.identity();
+            // right leg
+            let xAxis = hipX.clone();
+            let yAxis = hipY.clone();
+            let zAxis = hipZ.clone();
+            let basis = new THREE.Matrix3().set(
+                xAxis.x, yAxis.x, zAxis.x,
+                xAxis.y, yAxis.y, zAxis.y,
+                xAxis.z, yAxis.z, zAxis.z
+            );
 
-        rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
-        rightHipBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+            let rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
+            rightHipBone.quaternion.slerp(rot, SMOOTHING);
+            updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkleBone.position, basis);
-        rightKneeBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+            rot = rotateBone(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkleBone.position, basis);
+            rightKneeBone.quaternion.slerp(rot, SMOOTHING);
+            updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        //rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
-        //rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+            rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
+            rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+        }
     } else {
         // reset legs
         leftHipBone.quaternion.identity();
@@ -342,14 +377,14 @@ export function setFingers(handLandmarks, isRight) {
 
     // iterate thumb joints
     for (let i = 1; i < 4; i++) {
-        let rot = rotateBone(userJoints[i], userJoints[i + 1], avatarBones[i + 1].position, basis);       
+        let rot = rotateBone(userJoints[i], userJoints[i + 1], avatarBones[i + 1].position, basis);
         let angles = new THREE.Euler().setFromQuaternion(rot.normalize());
 
         // constrain finger rotation to x-axis, range [0, 90] degrees
         let angleX = angles.toVector3().length();
         angleX = Math.max(0, angleX);
         angleX = Math.min(Math.PI / 2, angleX);
-        
+
         if (isRight) smoothRotation(avatarBones[i], angleX - 0.2 * Math.PI, 0, 0);
         else smoothRotation(avatarBones[i], angleX, 0, 0);
 
@@ -366,7 +401,7 @@ export function setFingers(handLandmarks, isRight) {
         // iterate finger joints
         for (let j = i; j < i + 3; j++) {
             let rot = rotateBone(userJoints[j], userJoints[j + 1], avatarBones[j + 1].position, basis);
-            
+
             // constrain finger rotation to z-axis, range [0, 90] degrees
             let angleZ = new THREE.Euler().setFromQuaternion(rot.normalize()).z;
             angleZ = Math.max(0, angleZ);

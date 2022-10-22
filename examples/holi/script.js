@@ -148,13 +148,13 @@ function onResults(results) {
             ]]);
         }
         // Pose...
-        drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, mpHolistic.POSE_CONNECTIONS, { color: 'white' });
+        drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, mpHolistic.POSE_CONNECTIONS, { color: 'red' });
         drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_LEFT)
-            .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
+            .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'red', fillColor: 'rgb(255,138,0)' });
         drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_RIGHT)
-            .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
+            .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'red', fillColor: 'rgb(0,217,231)' });
         // Hands...
-        drawingUtils.drawConnectors(canvasCtx, results.rightHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'white' });
+        drawingUtils.drawConnectors(canvasCtx, results.rightHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'red' });
         drawingUtils.drawLandmarks(canvasCtx, results.rightHandLandmarks, {
             color: 'white',
             fillColor: 'rgb(0,217,231)',
@@ -199,6 +199,7 @@ function onResults(results) {
         if (faceLandmarks) {
             setMorphs(faceLandmarks);
         }
+    
     }
     canvasCtx.restore();
 }
