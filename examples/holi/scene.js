@@ -17,7 +17,7 @@ export async function init() {
     
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(canvasWidthOffset * (window.innerWidth/2), window.innerHeight);
-    //renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = true;
 
     // camera
     camera = new THREE.PerspectiveCamera(45, canvasWidthOffset * (window.innerWidth/2) / window.innerHeight, 1, 2000);

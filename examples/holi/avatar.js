@@ -68,6 +68,7 @@ export async function Avatar(name, loader) {
 
     // Skeleton / Bone
     skeleton = avatar.getObjectByName("mixamorigHips");
+    skeleton.userData.originalPosition = skeleton.position.clone();
     spine = avatar.getObjectByName("mixamorigSpine");
     neckBone = skeleton.getObjectByName("mixamorigHead");
 
@@ -168,27 +169,6 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
     let leftHipVis = poseWorldLandmarks[LEFTHIP].visibility;
 
 
-
-    /*
-    log("pw  LEFTSHOULDER x ", (poseWorldLandmarks[LEFTSHOULDER].x-poseLandmarks[LEFTSHOULDER].x));
- console.log("pw  LEFTSHOULDER y ", (poseWorldLandmarks[LEFTSHOULDER].y-poseLandmarks[LEFTSHOULDER].y));
- console.log("pw  LEFTSHOULDER z ", (poseWorldLandmarks[LEFTSHOULDER].z-poseLandmarks[LEFTSHOULDER].z));
-
- //console.log("p  LEFTSHOULDER", poseLandmarks[LEFTSHOULDER],poseWorldLandmarks[LEFTSHOULDER]);
- 
- console.log("pw  LEFTSHOULDER", poseWorldLandmarks[LEFTSHOULDER]);
- console.log("pw       LEFTHIP", poseWorldLandmarks[LEFTHIP]);
- console.log("pw      LEFTFOOT", poseWorldLandmarks[LEFTFOOT]);
- console.log("p  LEFTSHOULDER", poseLandmarks[LEFTSHOULDER]);
- console.log("p       LEFTHIP", poseLandmarks[LEFTHIP]);
- console.log("p      LEFTFOOT", poseLandmarks[LEFTFOOT]);
-
- console.log(" ");
-*/
-    //, poseWorldLandmarks[LEFTHIP], poseWorldLandmarks[LEFTFOOT]);
-    //console.log("p ", poseLandmarks[LEFTSHOULDER], poseLandmarks[LEFTHIP], poseLandmarks[LEFTFOOT]);
-
-
     // REQUIRED: both shoulders must be visible to track upperbody
     if (rightShoulderVis > VISTHRESH && leftShoulderVis > VISTHRESH) {
         // shoulder local coordinate system
@@ -258,6 +238,9 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
     // REQUIRED: both hips must be visible to track lowerbody
     if (rightHipVis > VISTHRESH && leftHipVis > VISTHRESH) {
 
+        // get last world position of them feet
+        let lastRightFootPosW = rightFootBone.localToWorld(new THREE.Vector3);
+        let lastLeftFootPosW = leftFootBone.localToWorld(new THREE.Vector3);
 
         // hip local coordinate system
         // positive directions: x - leftHip -> rightHip,
@@ -274,21 +257,15 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         smoothRotation(spine, 0.2 * Math.PI / 2, -rotY, 0);
 
         // world position
+        /*
         let LH = new THREE.Vector3(poseLandmarks[LEFTHIP].x * WIDTH, poseLandmarks[LEFTHIP].y * HEIGHT);
         let RH = new THREE.Vector3(poseLandmarks[RIGHTHIP].x * WIDTH, poseLandmarks[RIGHTHIP].y * HEIGHT);
 
-        console.log("l -r  ", poseWorldLandmarks[LEFTFOOT].y - poseWorldLandmarks[RIGHTFOOT].y);
-
         let percentX = LH.lerp(RH, 0.5).x / WIDTH - 0.5;
         skeleton.position.x = 0.95 * skeleton.position.x + 0.05 * percentX * -1000;
+        */
 
-        // abs > 0.1
-        if ((poseWorldLandmarks[LEFTFOOT].y < poseWorldLandmarks[RIGHTFOOT].y) && (poseWorldLandmarks[RIGHTFOOT].y - poseWorldLandmarks[LEFTFOOT].y)>0.1) {
             // left leg
-            rightHipBone.quaternion.identity();
-            rightKneeBone.quaternion.identity();
-            rightAnkleBone.quaternion.identity();
-
             let xAxis = hipX.clone();
             let yAxis = hipY.clone();
             let zAxis = hipZ.clone();
@@ -308,21 +285,19 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
 
             rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
             leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
-        } else {
-            leftHipBone.quaternion.identity();
-            leftKneeBone.quaternion.identity();
-            leftAnkleBone.quaternion.identity();
+
             // right leg
-            let xAxis = hipX.clone();
-            let yAxis = hipY.clone();
-            let zAxis = hipZ.clone();
-            let basis = new THREE.Matrix3().set(
+            xAxis = hipX.clone();
+            yAxis = hipY.clone();
+            zAxis = hipZ.clone();
+
+            basis = new THREE.Matrix3().set(
                 xAxis.x, yAxis.x, zAxis.x,
                 xAxis.y, yAxis.y, zAxis.y,
                 xAxis.z, yAxis.z, zAxis.z
             );
 
-            let rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
+            rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
             rightHipBone.quaternion.slerp(rot, SMOOTHING);
             updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
 
@@ -332,7 +307,22 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
 
             rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
             rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+        
+        // current feet positions
+        skeleton.updateMatrixWorld(true);
+        let rightFootPosW = rightFootBone.localToWorld(new THREE.Vector3);
+        let leftFootPosW = leftFootBone.localToWorld(new THREE.Vector3);
+
+        if (rightFootPosW.y < leftFootPosW.y) {
+            // right foot on the ground - keep it that way
+            skeleton.position.add(lastRightFootPosW).sub(rightFootPosW);
+        } else {
+            // left foot on the ground - keep it that way
+            skeleton.position.add(lastLeftFootPosW).sub(leftFootPosW);
         }
+
+        // in case things go wrong, pull the skeleton back to where it was
+        skeleton.position.lerp(skeleton.userData.originalPosition, 0.01);
     } else {
         // reset legs
         leftHipBone.quaternion.identity();

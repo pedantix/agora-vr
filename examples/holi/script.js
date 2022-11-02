@@ -180,7 +180,6 @@ function onResults(results) {
         drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYEBROW, { color: 'rgb(255,138,0)' });
         drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_FACE_OVAL, { color: '#E0E0E0', lineWidth: 5 });
         drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LIPS, { color: '#E0E0E0', lineWidth: 5 });
-
         if (results.za) {
             setPose(results.poseLandmarks, results.za);
         }
@@ -199,7 +198,6 @@ function onResults(results) {
         if (faceLandmarks) {
             setMorphs(faceLandmarks);
         }
-    
     }
     canvasCtx.restore();
 }
