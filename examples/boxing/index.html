@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src * gap://ready file: localhost:*;
+  style-src 'self' 'unsafe-inline';
+  connect-src 'self' blob: data: *;
+  img-src 'self' blob: data: *;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' apps.8thwall.com cdn.8thwall.com localhost:* ;
+  script-src-elem 'self' https: blob: 'unsafe-inline' ;
+  worker-src 'self' blob:;
+  child-src 'unsafe-inline' blob: 'self';
+  media-src 'self' blob: data: https:;">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,700;1,300;1,700&display=swap" rel="stylesheet">
+
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="/dist/aframe-extras.min.js"></script>
+  <script src="/js/aframe-lightmap.js"></script>
+  <script src="./js/chroma-blue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+  <script src="/easyrtc/easyrtc.js"></script>
+  <script src="/js/vbg0.js"></script>
+  <script src="/js/AgoraRTC_N_4_8_2.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@1.5.1/index.js"></script>
+  <script src="https://player.8i.com/release/latest/volcap-player.js"></script>
+
+  <!--
+  
+
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    -->
+  <script src="../dist/networked-aframe.js"></script> <!-- blue bg-->
+  <script src="./js/MantisRYSKaframe.min.js"></script>
+  <style type="text/css">
+    #play {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 70px;
+      height: 35px;
+      font-size: 17px;
+      z-index: 2
+    }
+
+    #three {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 100px;
+      height: 35px;
+      font-size: 17px;
+      z-index: 2
+    }
+
+    #playcanvas {
+      position: absolute;
+      top: 15px;
+      right: 130px;
+      width: 100px;
+      height: 35px;
+      font-size: 17px;
+      z-index: 2
+    }
+  </style>
+  <script>
+    let vbg='false';
+    let vbg0='false';
+    const userPositionGroups = {
+      1: {
+        1: { x: 0, y: 1.415, z: -2.85 }
+      },
+      2: {
+        1: { x: -1.25, y: 1.415, z: -2.57 },
+        2: { x: 1.25, y: 1.415, z: -2.57 }
+      },
+      3: {
+        1: { x: -1.74, y: 1.415, z: -2.2 },
+        2: { x: 0, y: 1.415, z: -2.5 },
+        3: { x: 1.74, y: 1.415, z: -2.2 }
+      },
+      4: {
+        1: { x: -2, y: 1.0, z: 1.3 },
+        2: { x: -0.68, y: 1.38, z: -2.5 },
+        3: { x: 0.68, y: 1.38, z: -2.5 },
+        4: { x: 1.88, y: 1.38, z: -2.25 }
+      },
+      5: {
+        1: { x: -2.16, y: 1.36, z: -1.94 },
+        2: { x: -1.25, y: 1.36, z: -2.57 },
+        3: { x: 0, y: 1.36, z: -2.85 },
+        4: { x: 1.25, y: 1.36, z: -2.57 },
+        5: { x: 2.16, y: 1.36, z: -1.94 }
+      }
+    };
+    const userVideoSizes = {
+      1: 4.8,
+      2: 4.8,
+      3: 4.8,
+      4: 4.7,
+      5: 4.6
+    }
+  </script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/dom_content_loaded.js"></script>
+  <script src="./js/components.js"></script>
+
+  <script>
+    // Note the way we're establishing the NAF schema here; this is a bit awkward
+    // because of a recent bug found in the original handling. This mitigates that bug for now,
+    // until a refactor in the future that should fix the issue more cleanly.
+    NAF.schemas.getComponentsOriginal = NAF.schemas.getComponents;
+
+    // This one is necessary, because tracking the .head child component's material's color
+    // won't happen unless we tell NAF to keep it in sync, like here.
+    NAF.schemas.getComponents = (template) => {
+      if (!NAF.schemas.hasTemplate("#avatar-template")) {
+        NAF.schemas.add({
+          template: '#avatar-template',
+          components: [
+            // position and rotation are synced by default, but if we declare
+            // a custom schema, then ommitting them will cause them to go untracked.
+            'position',
+            'rotation',
+            'player-info',
+            {
+              selector: '.head',
+              component: 'material',
+              property: 'color'
+            },
+            {
+              selector: '.head',
+              component: 'rotation'
+            }
+          ]
+        });
+      }
+      if (!NAF.schemas.hasTemplate("#screen-template")) {
+        NAF.schemas.add({
+          template: '#screen-template',
+          components: [
+            // position and rotation are synced by default, but if we declare
+            // a custom schema, then ommitting them will cause them to go untracked.
+            'position',
+            'seat',
+            'width',
+            'height'
+          ]
+        });
+      }
+      if (!NAF.schemas.hasTemplate("#camera-rig-template")) {
+        NAF.schemas.add({
+          template: '#camera-rig-template',
+          components: [
+            // position and rotation are synced by default, but if we declare
+            // a custom schema, then ommitting them will cause them to go untracked.
+            'position',
+            'rotation'
+          ]
+        });
+      }
+      if (!NAF.schemas.hasTemplate("#camera-rig-template-oculus")) {
+        NAF.schemas.add({
+          template: '#camera-rig-template-oculus',
+          components: [
+            // position and rotation are synced by default, but if we declare
+            // a custom schema, then ommitting them will cause them to go untracked.
+            'position',
+            'rotation'
+          ]
+        });
+      }
+      // likewise for the left-hand-template and right-hand-template--since we're only
+      // syncing position/rotation, no schema declaration needed!
+
+      const components = NAF.schemas.getComponentsOriginal(template);
+      return components;
+    }
+  </script>
+  <script src="/dist/naf-agora-adapter.js"></script>
+  <script src="/js/Geometry.js"></script>
+  <script src="/js/wait_for_element.js"></script>
+  <script src="/js/look.js"></script>
+  <script src="/js/tracked-vr-device.js"></script>
+  <script src="/js/gun.component.js"></script>
+  <script src="/js/forward.component.js"></script>
+  <script src="/js/remove-in-seconds.component.js"></script>
+  <script src="/js/light-map-geometry.js"></script>
+  <script id="vertex_shader" type="x-shader/x-vertex">varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
+    void main() {
+        vUv = uv;
+        vNormal = normal;
+        gl_PointSize = 8.0;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+        vPosition = mat3(modelViewMatrix) * position;
+    }</script>
+  <script id="f_lit" type="x-shader/x-fragment">// Testing light values/normals
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
+    uniform sampler2D map;
+    uniform float contrast;
+    uniform float opacity;
+    uniform float deltaTime;
+
+    #define EPSILON 1e-6
+
+    #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
+    uniform float logDepthBufFC;
+    varying float vFragDepth;
+    varying float vIsPerspective;
+    #endif
+
+    void main() {
+        vec3 lightColor = vec3(1.0);
+        vec3 lightPosition = vec3(10.0*sin(deltaTime*3.25),10.0*sin(deltaTime*1.25),10.0*sin(deltaTime*1.25));
+
+        vec3 col = (clamp(texture2D(map, vUv).rgb - vec3(1.0 - contrast), 0.0, 1.0)) * 1.0 / contrast;
+        vec3 v = normalize(cameraPosition - vPosition);
+        vec3 l = normalize(lightPosition - vPosition);
+        vec3 n = normalize(vNormal);
+        vec3 h = normalize(l+v);
+        vec3 a = .4*col;
+        vec3 d = vec3(max(dot(vNormal, l), 0.0)) * lightColor;
+        vec3 s = vec3(max(0.2*pow(dot(l, h), 100.0), 0.0));
+
+        vec3 litColor = (s + d) * col;
+        col = mix(litColor, col, 0.6);
+        //col = s + d;
+        gl_FragColor = vec4(col, 1.0);
+    }</script>
+
+  <link rel="stylesheet" type="text/css" href="./css/style.css" />
+  <link rel="stylesheet" type="text/css" href="./css/adv-screen.css" />
+</head>
+
+<body>
+  <img class="loader" src="../assets/puff.svg" />
+  <a-scene id="scene" inspector-plugin-recast 
+  networked-scene="connectOnLoad: false;"
+  renderer="colorManagement: true; physicallyCorrectLights:true;" light="defaultLightsEnabled: false">
+
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="gym" src="assets/Gym.glb"></a-asset-item>
+      <a-asset-item id="nav_mesh" src="assets/Gym_Navmesh.glb"></a-asset-item>
+	  
+      <img id="RefProbe" src="images/GymCubeMap.png">
+      <img id="SnitchColor" src="images/Snitch_Color.png">
+      <img id="SnitchNormal" src="images/Snitch_Normal.jpg">
+	  
+    </a-assets>
+	
+    <!-- Lights -->
+    <a-entity id="DirectionalLight" position="0 10 -2"
+      light="color: #ffffff; intensity: 2; castShadow:  true; shadowCameraRight:  3;  shadowCameraBottom:  -3;  shadowCameraLeft:  -3; shadowCameraTop:  4 shadowBias:  -0.0001;  shadowRadius:  4">
+    </a-entity>
+    <a-entity id="AmbientLight" position="0 0 0"
+      light="color: #ffffff; type: ambient; intensity: 2; castShadow:  false">
+    </a-entity>
+
+    <!-- World -->
+    <a-entity id="Gym" shadow="cast: false" gltf-model="#gym">
+    </a-entity>
+
+    <a-assets>
+      <!-- Camera Rig Oculus / Player -->
+      <template id="camera-rig-template-oculus">
+        <a-entity id="oculusHead" gltf-model="#OculusGlb" positon="0 0 0" scale="0.3 0.3 0.3">
+        </a-entity>
+      </template>
+
+      <!-- Camera Rig / Player -->
+      <template id="camera-rig-template">
+        <a-entity id="SnitchParent" scale="1 1 1">
+          <a-entity obj-model="obj: ./assets/Snitch.obj" id="Snitch" position="0 1.5 0" rotation="0 180 0" scale="0.01 0.01 0.01" shadow="" material="color: #bd0000; alphaTest: 0.5; metalness: 0.8; roughness: 0.15; normalMap: #SnitchNormal; sphericalEnvMap: #RefProbe; src: #SnitchColor "></a-entity>
+          </a-entity>
+      </template>
+
+      <!-- My streming screen plane -->
+      <template id="screen-template">
+        <a-plane class="screenPlane" visible="false" look-at="#player" position="0 0 0" scale="0.86 0.5 0.33"
+          material="side: double;" networked-video-source-green-screen="streamName: video; GreenThresholdIn:0.17">
+        </a-plane>
+      </template>
+
+      <!-- Avatar -->
+      <template id="avatar-template">
+        <a-entity class="avatar" networked-audio-source scale="1.35 1.35 1.35" player-info>
+          <a-entity position="0 0.25 0" scale="0.3 0.3 0.3" look-at-modified="#player" >
+            <a-plane class="nametag" rotation="0 0 0"  position="0 -1.3 0" canvas-to-text="width: 2; height: 0.5; string: ;"></a-plane>
+            <a-rounded position="-1.2 -1.45 -0.01" width="2.4" height="0.3" radius="0.05" color='#000000' opacity='0.6'></a-rounded>
+          </a-entity>
+        </a-entity>
+      </template>
+
+      <!-- Bullet -->
+      <template id="bullet-template">
+        <a-entity>
+          <a-sphere class="bullet" scale="0.1 0.1 0.1" color="#fff"></a-sphere>
+        </a-entity>
+      </template>
+    </a-assets>
+
+ <!-- 8i -->
+ <a-entity id="hologram"
+ position="0 0 0"
+ scale="1.2 1.2 1.2"
+ hologram="src: https://dash-cdn.8i.com/3/shows/206/takes/zi90elx6/manifest.mpd; loop: true;"></a-entity>
+</a-entity>
+
+     <!-- Chloe
+    <mantis-ryskurl id="chloe" position="1.5 0 1.6" volume="1" loop="true" 
+    vvol="1"
+    videourl="http://localhost:5832/stage/assets/chloe_battle_v4.mp4" 
+    dataurl="http://localhost:5832/stage/assets/chloe_battle_syk.mp4"
+    >
+  </mantis-ryskurl> -->
+
+    <!-- Navigation Mesh -->
+  <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
+
+  <a-entity id="camera-rig"
+            tracked-vr-device
+            networked="template:#camera-rig-template; attachTemplateToLocal:false;"
+            position="0 0 2"
+	        rotation="0 0 0"
+            movement-controls="constrainToNavMesh: false;">
+    <!-- Pawn -->
+    <a-entity id="player"
+            networked="template:#avatar-template; attachTemplateToLocal:false;"
+            camera="active:true"
+            position="0 1.7 0" 
+            look-controls          
+            >
+    </a-entity>  
+  </a-entity>
+
+    <!-- Player streaming screen -->
+    <a-plane id="player_video_avatar" networked="template:#screen-template; attachTemplateToLocal: false"
+      visible="false" width="1.8" height="1.8" look-at="#player" material="transparent:1; alphaTest:0.5; side: double"
+      scale="0.86 0.5 0.33" position="0 1.41 -2.85">
+    </a-plane>
+
+
+
+  </a-scene>
+
+  <div class="ui">
+    <div id="displayNameInputContainer" class="fade">
+      <form class="">
+        <h2 id="id_1" class="" for="id_0">Display Name</h2>
+        <input id="displayNameInput" class="" pattern="^[A-Za-z0-9_~ -]{3,32}$" spellcheck="false" required="" value="">
+        <small class="">Alphanumerics, hyphens, underscores, and tildes. At least 3 characters, no more than 32</small>
+        <div id="avatarSelection"></div>
+        <a id="displayNameInputSubmit" class="button flex">Accept</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="videoUI" style="display:none; text-align:center; color:white; position: absolute; ileft:-500px; ">
+    <div class="video-canvas-container">
+      <canvas id="canvas_secret" class="output_canvas" width="800px" height="600px"
+        style="width:160px; height:120px"></canvas>
+    </div>
+    <div class="video-canvas-container"
+      style="width: 160px; height: 120px; margin-top: 17px; margin-left: 186px; border: 0px solid white;">
+      <div style="display:none;" id="local-player" class="player"></div>
+    </div>
+  </div>
+
+
+
+    <script src="./material.js"></script>
+
+
+  <!--script type="module" src="./js/chloe.js"></script--->
+  <!--script type="module" src="./js/remy.js"></script-->
+  
+</body>
+
+</html>
