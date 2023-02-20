@@ -1,0 +1,7 @@
+#kill nginx
+sudo killall nginx 
+sudo certbot --nginx -d vr-demo.agora.io
+sudo cp  /etc/letsencrypt/live/vr-demo.agora.io/privkey.pem ~/key.pem
+sudo cp /etc/letsencrypt/live/vr-demo.agora.io/fullchain.pem ~/cert.pem
+sudo killall nginx 
+sudo  /usr/sbin/nginx
