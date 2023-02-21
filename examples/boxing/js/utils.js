@@ -87,9 +87,6 @@ function enterScene() {
     const enterVRButt = document.querySelector(".a-enter-vr");
     const guiControls = document.querySelector(".close-bottom");
     const enterText = document.querySelector(".enterText");
-    let displayNameInput = document.querySelector("#displayNameInput").value;
-
-    setCookie('stage', displayNameInput);
 
     scene.style.display = "block";
     if (guiControls) {
@@ -97,95 +94,8 @@ function enterScene() {
     }
     enterVRButt.style.display = 'block';
 
-    // enterText.parentNode.removeChild(enterText);
-    // connect to network scene and start loading networked objects
     scene.emit('connect');
-    try {
-        if (typeof startCall === 'function') {
-            startCall();
-        }
-    } catch (e) {
-        console.error(e)
-    }
 
-    if (document.querySelector("#chloe") && document.querySelector("#chloe").object3D  && document.querySelector("#chloe").object3D.children[0] && document.querySelector("#chloe").object3D.children[0].material)
-    {
-        /*
-        document.querySelector("#chloe").object3D.children[0].material.color.b=1.4;
-        document.querySelector("#chloe").object3D.children[0].material.color.g=1.6;
-        document.querySelector("#chloe").object3D.children[0].material.color.r=2.2;
-        */
-
-        document.querySelector("#chloe").object3D.children[0].material.color.b=1.1;
-        document.querySelector("#chloe").object3D.children[0].material.color.g=1.3;
-        document.querySelector("#chloe").object3D.children[0].material.color.r=1.6;
-        document.querySelector("#chloe").emit("ryskplay");
-    }
-   
-    
-    //hologramComponent.contrast=1;
-    //hologramComponent.material = new THREE.MeshBasicMaterial({map: hologram.map})  
-/*
-
-    // Switch material
-    //hologramComponent.material = new THREE.MeshBasicMaterial()
-
-    hologramComponent.material = new THREE.ShaderMaterial({
-        vertexShader:  hologramComponent.material.vertexShader,
-        fragmentShader:  hologramComponent.material.fragmentShader,
-        transparent: true,
-        uniforms: hologramComponent.material.uniforms,
-        lights: true
-    })
-     uniforms: {
-      color: { value: new THREE.Color(0xffffff) },
-      lightDirection: { value: new THREE.Vector3(1.0, 1.0, 1.0).normalize() },
-      map: new THREE.Uniform(hologramComponent.map),
-      
-    },
-*/
-/*
-const material = new THREE.ShaderMaterial({
-    uniforms: hologramComponent.material.uniforms,
-    fragmentShader: hologramComponent.material.fragmentShader,
-    vertexShader: hologramComponent.material.vertexShader,
-    lights: false
-  });
-
-  window.material=material;
-  hologramComponent.material=material;
-  */
- 
-  const hologramComponent = document.querySelector('#hologram').components.hologram;
- /*
-  hologramComponent.material = new THREE.ShaderMaterial({
-    glslVersion: THREE.GLSL1,
-    vertexShader: document.getElementById('vertex_shader').textContent,
-    fragmentShader: document.getElementById('f_lit').textContent,
-    transparent: true,
-    uniforms: {
-        deltaTime: new THREE.Uniform(0),
-        opacity: new THREE.Uniform(1.0),
-        contrast: new THREE.Uniform(0.95),
-        map: new THREE.Uniform(hologramComponent.map),
-        lights: true
-    },
-})
-
-hologramComponent.material = new THREE.ShaderMaterial({
-    fragmentShader: hologramComponent.material.fragmentShader,
-    vertexShader: hologramComponent.material.vertexShader,
-    transparent: true,
-    uniforms: {
-        deltaTime: new THREE.Uniform(0),
-        opacity: new THREE.Uniform(1.0),
-        contrast: new THREE.Uniform(0.95),
-        map: new THREE.Uniform(hologramComponent.map),
-        lights: true
-    },
-    lights: false,
-  });
-   */
     ///add Q and E keyboard shortcuts to rotate left/right
     document.addEventListener('keypress', (event) => {
         var name = event.key;

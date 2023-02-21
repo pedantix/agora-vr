@@ -6,6 +6,35 @@ function appendMain(shader, code) {
       shader.slice(0, lastIndex) + code + shader.slice(lastIndex + code.length)
     );
   }
+
+  function enterScene() {
+    const scene = document.querySelector('a-scene');
+    const enterVRButt = document.querySelector(".a-enter-vr");
+    const guiControls = document.querySelector(".close-bottom");
+    
+    scene.style.display = "block";
+    if (guiControls) {
+        guiControls.style.display = 'block';
+    }
+    enterVRButt.style.display = 'block';
+
+    scene.emit('connect');
+
+    ///add Q and E keyboard shortcuts to rotate left/right
+    document.addEventListener('keypress', (event) => {
+        var name = event.key;
+        var code = event.code;
+        
+        switch(code) {
+          case 'KeyE':
+            document.getElementById("camera-rig").object3D.rotation.y -= Math.PI/16;
+            break;
+          case 'KeyQ':
+            document.getElementById("camera-rig").object3D.rotation.y += Math.PI/16;
+            break;
+        }
+      }, false);
+}
   
   // Inject our content into an existing material
   function injectShader(shader) {
@@ -35,7 +64,6 @@ function appendMain(shader, code) {
       uniforms,
     };
   }
-
 
      const hologramEl = document.getElementById("hologram");
       hologramEl.addEventListener("oncanplay", () => {
@@ -69,6 +97,7 @@ function appendMain(shader, code) {
         );
   */              
         hologram.material = eightiMaterial.material;
-        hologram.play()
+        hologram.play();
+        enterScene();
       });
   

@@ -1,4 +1,4 @@
-function dom_loaded() {
+function dom_loaded() {/*
 	const playerCameraEl = document.querySelector('#player');
 	playerCameraEl.setAttribute('camera', 'active', 'true');
 	toggleVideoStreaming(scene);
@@ -21,6 +21,7 @@ function dom_loaded() {
 		enterScene();
 		document.getElementById('displayNameInputContainer').classList.remove('show');
 	});
+	*/
 }
 
 
