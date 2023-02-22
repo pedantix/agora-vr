@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="/dist/aframe-extras.min.js"></script>
+  <script src="/js/aframe-lightmap.js"></script>
+  <script src="https://player.8i.com/release/latest/volcap-player.js"></script>
+  <script src="/js/Geometry.js"></script>
+  <script src="/js/tracked-vr-device.js"></script>
+  <script src="/js/light-map-geometry.js"></script>
+
+</head>
+
+<body>
+  <a-scene id="scene" inspector-plugin-recast 
+  networked-scene="connectOnLoad: false;"
+  renderer="colorManagement: true; physicallyCorrectLights:true;" light="defaultLightsEnabled: false">
+
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="gymi" src="assets/Gym.glb"></a-asset-item>
+      <a-asset-item id="hangari" src="assets/Hangar.glb"></a-asset-item>
+      <a-asset-item id="nav_mesh" src="assets/Gym_Navmesh.glb"></a-asset-item>	  
+      <img id="RefProbe" src="cubemaps/GymCubeMap.png">    
+    </a-assets>
+	
+    <!-- Lights -->
+    <a-entity id="DirectionalLight" position="0 10 -2"
+      light="color: #ffffff; intensity: 2; castShadow:  true; shadowCameraRight:  3;  shadowCameraBottom:  -3;  shadowCameraLeft:  -3; shadowCameraTop:  4 shadowBias:  -0.0001;  shadowRadius:  4">
+    </a-entity>
+    <a-entity id="AmbientLight" position="0 0 0"
+      light="color: #ffffff; type: ambient; intensity: 2; castShadow:  false">
+    </a-entity>
+
+    <!-- World -->
+    <a-entity id="gym" shadow="cast: false" visible="true" gltf-model="#gymi">    </a-entity>
+    <a-entity id="hangar" shadow="cast: false" visible="false" gltf-model="#hangari"></a-entity>
+
+
+ <!-- 8i -->
+ <a-entity id="hologram"
+    position="0 0 0"
+    scale="1.2 1.2 1.2"
+    hologram="src: https://dash-cdn.8i.com/3/shows/206/takes/zi90elx6/manifest.mpd; muted: true; autoplay: false; loop: true;"></a-entity>
+</a-entity>
+
+    <!-- Navigation Mesh -->
+  <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
+
+  <a-entity id="camera-rig"
+            tracked-vr-device
+            networked="template:#camera-rig-template; attachTemplateToLocal:false;"
+            position="0 0 2"
+	        rotation="0 0 0"
+            movement-controls="constrainToNavMesh: true;">
+    <!-- Pawn -->
+    <a-entity id="player"
+            networked="template:#avatar-template; attachTemplateToLocal:false;"
+            camera="active:true"
+            position="0 1.7 0" 
+            look-controls          
+            >
+    </a-entity>  
+  </a-entity>
+
+  </a-scene>
+
+  <script src="./js/material.js"></script>
+  <script>
+
+    setInterval(toggle,14000);
+    function toggle() {
+      if (document.getElementById("gym").getAttribute('visible')) {
+        document.getElementById("gym").setAttribute('visible',false);
+        document.getElementById("hangar").setAttribute('visible',true);
+      } else {
+        document.getElementById("gym").setAttribute('visible',true);
+        document.getElementById("hangar").setAttribute('visible',false);
+      }
+    }
+
+
+  </script>
+</body>
+</html>
