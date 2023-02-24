@@ -9,25 +9,22 @@
   <script src="/public/js/play-on-window-click2.js"></script>
   <script src="/public/js/play-on-vrdisplayactivate-or-enter-vr.js"></script>
   <script src="/public/js/hide-once-playing2.js"></script>
-   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-    <script src="/js/parseURL.js"></script>
-
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+   <script src="/js/parseURL.js"></script>
 </head>
 <body>
 
   <a-scene>
     <a-assets>
-      <video id="video"
-               loop crossorigin="anonymous" playsinline webkit-playsinline>
-          <!-- MP4 video source. -->
-          <source type="video/mp4"
-               src="" />
+      <video id="video" loop crossorigin="anonymous" playsinline webkit-playsinline> 
+	      <source type="video/mp4" src="" />
       </video>
       
     </a-assets>
 
     <!-- Define camera with user height, movement control and arrow key rotation added. -->
-    <a-camera look-controls arrow-key-rotation>
+    <a-camera look-controls arrow-key-rotation position wasd-controls="acceleration: 1555" rotation  >
+
       <!-- Text element for display messaging.  Hide once video is playing. -->
       <a-entity id="msg" position="0 -0.3 -1.5" text="align:center; 
                 width:6;
@@ -86,6 +83,20 @@
 	}
 	agora();
 
+		    ///add Q and E keyboard shortcuts to rotate left/right
+    document.addEventListener('keypress', (event) => {
+        var name = event.key;
+        var code = event.code;
+
+        switch(code) {
+          case 'KeyE':
+            document.getElementById("camera-rig").object3D.rotation.y -= Math.PI/16;
+            break;
+          case 'KeyQ':
+            document.getElementById("camera-rig").object3D.rotation.y += Math.PI/16;
+            break;
+        }
+      }, false);
 	</script>
 </body>
 </html>

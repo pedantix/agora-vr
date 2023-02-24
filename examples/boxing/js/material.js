@@ -71,7 +71,7 @@ function appendMain(shader, code) {
 
       let  eightiMaterial = decorateMaterial(
             new THREE.MeshBasicMaterial({
-              color: new THREE.Color(0x99AAAA),
+              color: new THREE.Color(0x90A0A0),
               map: hologram.map,
               transparent: true,
               emissiveIntensity: 0.3,

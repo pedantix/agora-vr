@@ -25,10 +25,10 @@
 	
     <!-- Lights -->
     <a-entity id="DirectionalLight" position="0 10 -2"
-      light="color: #ffffff; intensity: 2; castShadow:  true; shadowCameraRight:  3;  shadowCameraBottom:  -3;  shadowCameraLeft:  -3; shadowCameraTop:  4 shadowBias:  -0.0001;  shadowRadius:  4">
+      light="color: #ffffff; intensity: 1.9; castShadow:  true; shadowCameraRight:  3;  shadowCameraBottom:  -3;  shadowCameraLeft:  -3; shadowCameraTop:  4 shadowBias:  -0.0001;  shadowRadius:  4">
     </a-entity>
     <a-entity id="AmbientLight" position="0 0 0"
-      light="color: #ffffff; type: ambient; intensity: 2; castShadow:  false">
+      light="color: #ffffff; type: ambient; intensity: 1.9; castShadow:  false">
     </a-entity>
 
     <!-- World -->
@@ -67,7 +67,7 @@
   <script src="./js/material.js"></script>
   <script>
 
-    setInterval(toggle,14000);
+    setInterval(toggle,7000);
     function toggle() {
       if (document.getElementById("gym").getAttribute('visible')) {
         document.getElementById("gym").setAttribute('visible',false);
