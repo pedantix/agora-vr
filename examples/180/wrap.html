@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title></title>
+  <script src="/public/js/aframe.min.js"></script>
+  <script src="/public/js/aframe-chromakey-material.min.js"></script>
+  <script src="/public/js/play-on-window-click2.js"></script>
+  <script src="/public/js/play-on-vrdisplayactivate-or-enter-vr.js"></script>
+  <script src="/public/js/hide-once-playing2.js"></script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+   <script src="/js/parseURL.js"></script>
+</head>
+<body>
+
+<a-scene>
+  <a-assets>
+    <video id="video" preload="auto" src="/path/to/video.mp4" width="1280" height="720" autoplay="true" loop="true" crossorigin="anonymous" playsinline="" webkit-playsinline=""></video>
+  </a-assets>
+  <a-curvedimage    play-on-window-click
+src="#video" height="8" radius="12" theta-length="80" rotation="0 140 0" position="0 1.5 8"  ></a-curvedimage>
+
+	<script>
+
+        const paramsString = document.location.search;
+        const searchParams = new URLSearchParams(paramsString);
+
+	var appid='20b7c51ff4c644ab80cf5a4e646b0537';
+	var room='vr180';
+	var token=null;
+	var clientId=null;
+        var agoraClient=AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+	async function agora() {
+
+        agoraClient.on("user-joined", async (user) => {
+           console.warn("user-joined",user);
+        });
+
+        agoraClient.on("user-published", async (user, mediaType) => {
+           await agoraClient.subscribe(user, mediaType);
+           if (mediaType === 'audio') {
+              user.audioTrack.play();
+           }
+           if (mediaType === 'video') {
+              var videoStream = new MediaStream();
+              videoStream.addTrack(user.videoTrack._mediaStreamTrack);
+              document.querySelector("#video").srcObject=videoStream;
+              document.querySelector("#video").play();
+           }
+           if (mediaType === 'audio') {
+              user.audioTrack.play();
+           }
+        });
+
+            await agoraClient.join(appid, room, token || null, clientId || null);
+            //var audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            //await agoraClient.publish([audioTrack]);
+
+	}
+	agora();
+
+		    ///add Q and E keyboard shortcuts to rotate left/right
+    document.addEventListener('keypress', (event) => {
+        var name = event.key;
+        var code = event.code;
+
+        switch(code) {
+          case 'KeyE':
+            document.getElementById("camera-rig").object3D.rotation.y -= Math.PI/16;
+            break;
+          case 'KeyQ':
+            document.getElementById("camera-rig").object3D.rotation.y += Math.PI/16;
+            break;
+        }
+      }, false);
+	</script>
+</body>
+</html>
