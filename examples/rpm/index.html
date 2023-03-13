@@ -15,8 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@1.5.1/index.js"></script>
   <script src="/dist/networked-aframe.js"></script>
   <script src="/dist/naf-agora-adapter.js"></script>
-  <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
-  <script src="/js/Geometry.js"></script>
+
 
 <script>
   // Temporary workaround for template declaration; see issue 167
@@ -96,11 +95,9 @@
   }
 </style>
 </head>
-
 <body>
 
 <iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write"  ></iframe>
-
 <input
   id="username-overlay"
   style="z-index: 100; bottom: 24px; left: -1148px; position: fixed"
@@ -108,7 +105,6 @@
 />
 
 <a-scene 
-
 networked-scene="
       app: 20b7c51ff4c644ab80cf5a4e646b0537;
       room: {'name':'test1', 'vbg0':false, 'showLocal': false};
@@ -246,9 +242,10 @@ networked-scene="
     
   }
 
-  function handleMocap() {
-
+  function handleMocap(csv) {
+    alert(csv);
   }
+  
   window.handleMocap=handleMocap;
 </script>
 
