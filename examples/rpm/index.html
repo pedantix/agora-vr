@@ -99,7 +99,7 @@
 
 <body>
 
-<iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write" ></iframe>
+<iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write"  ></iframe>
 
 <input
   id="username-overlay"
@@ -160,8 +160,9 @@ networked-scene="
 
     <!-- World -->
     <a-entity id="hangar" shadow="cast: false" visible="true" gltf-model="#hangari"></a-entity>
-
     <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
+
+
 
   <a-entity id="rig" movement-controls networked="template:#rig-template;">
     <a-entity
@@ -170,8 +171,16 @@ networked-scene="
       position="0 2.3 0"
       look-controls
       networked="template:#head-template;"
-      visible="false"
-    ></a-entity>
+      visible="true"
+    >
+    <a-entity id="self-view" 
+    gltf-model="?" 
+    position="0 -8 -0.5" rotation="-28 0 0" scale="4 4 4" ></a-entity>
+   <!-- position="-2 -4.3 -1.4" rotation="-10 60 -2" scale="2 2 2" ></a-entity> -->
+
+  </a-entity>
+
+
   </a-entity>
 </a-scene>
  
@@ -208,7 +217,10 @@ networked-scene="
           console.log(`Avatar URL: ${json.data.url}`);
 //          document.getElementById('avatarUrl').innerHTML = `Avatar URL: ${json.data.url}`;
           document.getElementById('frame').hidden = true;
-          document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
+          document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url);           
+          document.getElementById("self-view").setAttribute('gltf-model',  json.data.url);           
+       //   document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
+       //   document.getElementById("self-view").setAttribute('gltf-model',  json.data.url+"?"+Math.random());           
       }
 
       // Get user id
@@ -228,6 +240,16 @@ networked-scene="
   function displayIframe() {
       document.getElementById('frame').hidden = false;
   }
+
+
+  function showSelf() {
+    
+  }
+
+  function handleMocap() {
+
+  }
+  window.handleMocap=handleMocap;
 </script>
 
 <script>
