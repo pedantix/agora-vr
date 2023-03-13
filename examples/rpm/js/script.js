@@ -26,8 +26,10 @@ function subscribe(event) {
     if (json.eventName === 'v1.avatar.exported') {
         console.log(`Avatar URL: ${json.data.url}`);
         document.getElementById('frame').hidden = true;
-        document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url);
-        document.getElementById("self-view").setAttribute('gltf-model', json.data.url);
+        let v=json.data.url+"?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
+        MorphData={};
+        document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        document.getElementById("self-view").setAttribute('gltf-model', v);
         //   document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
         //   document.getElementById("self-view").setAttribute('gltf-model',  json.data.url+"?"+Math.random());           
     }
@@ -83,10 +85,11 @@ const NASAL = 4;       // 1 point above nose
 const LEFT = 454;      // left most point
 const RIGHT = 234;     // right most point
 const TOP = 10;        // top most point                       
-const BOT = 152;       // bot most point
+const BOTTOM = 152;       // bot most point
 const LEFT_LIP = 78;      // left most point
 const RIGHT_LIP = 308;     // right most point
-
+const TOP_LIP = 13;      // left most point
+const BOTTOM_LIP = 14;   
 
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
@@ -94,7 +97,7 @@ function onResultsFaceMesh(results) {
     canvasCtx.clearRect(0, 0, out.width, out.height);
     canvasCtx.drawImage(results.image, 0, 0, out.width, out.height);
 
-    if (results.multiFaceLandmarks) {
+    if (results.multiFaceLandmarks && getBone(document.getElementById("self-view").object3D,'head')) {
         for (const landmarks of results.multiFaceLandmarks) {
             var newArray = [];
             newArray.push(landmarks[NOSE]);
@@ -102,10 +105,14 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[LEFT]);
             newArray.push(landmarks[RIGHT]);
             newArray.push(landmarks[TOP]);
-            newArray.push(landmarks[BOT]);
+            newArray.push(landmarks[BOTTOM]);
             newArray.push(landmarks[LEFT_LIP]);
             newArray.push(landmarks[RIGHT_LIP]);
-
+            getBone(document.getElementById("self-view").object3D,'head').rotation.z=-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
+            getBone(document.getElementById("self-view").object3D,'head').rotation.y=3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
+            getBone(document.getElementById("self-view").object3D,'head').rotation.x=-0.4+(-2*(landmarks[TOP].z-landmarks[BOTTOM].z))  ;
+            playMorphTarget(document.getElementById("self-view").object3D,'jawOpen',4*(landmarks[BOTTOM_LIP].y-landmarks[TOP_LIP].y));
+            //getBone(document.getElementById("self-view").object3D,'head').rotation.x=0
            // console.log("Y", landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z, landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z);
             //newArray.push(landmarks[FACEMESH_LIPS[38][0]]);
 
@@ -198,3 +205,78 @@ const camera = new Camera(video, {
     height: 360
 });
 camera.start();
+
+/*
+window.head.rotation.x=-0.6*blendshapes_values[52]/60;
+window.head.rotation.y=0.6*blendshapes_values[53]/60;
+window.head.rotation.z=0.6*blendshapes_values[54]/60;    
+window.neck.rotation.x=-0.4*blendshapes_values[52]/60;
+window.neck.rotation.y=0.4*blendshapes_values[53]/60;
+window.neck.rotation.z=0.4*blendshapes_values[54]/60;
+*/
+let MorphData={};
+
+function getMeshMorphData(obj) {
+    let meshMorphData = MorphData[obj.uuid];
+    if (!meshMorphData) {
+        meshMorphData = [];
+        MorphData[obj.uuid]=meshMorphData
+        readBlendshapesFromAvatar(meshMorphData,obj);
+    }
+    if (meshMorphData.length==0) {
+        delete MorphData[obj.uuid];
+    }
+    return meshMorphData;
+}
+
+const readBlendshapesFromAvatar = function (meshMorphData, mesh) {
+    meshMorphData['bs']=[];
+
+    mesh.traverse((o) => {      
+      if (o.type == 'Bone') {
+        if (o.name== 'Neck' ) {
+          meshMorphData['neck']=o;
+        } else if (o.name== 'Head' ) {
+          meshMorphData['head']=o;
+        }
+      }
+
+      if (o.morphTargetInfluences && o.userData.targetNames) {
+        meshMorphData['bs'].push(o);
+      }
+/*
+      if (o.morphTargetInfluences && o.userData.targetNames) {        
+        for (let i = 0; i < o.userData.targetNames.length; i++) {
+            meshMorphData[o.userData.targetNames[i]]= o.morphTargetInfluences[i];
+            o.morphTargetInfluences[i] = 0;
+        }
+        console.log(o.type, o.name, o);
+      }
+      */
+    });
+  }
+
+  const getBone = function (obj, bone) {    
+    let meshMorphData=getMeshMorphData(obj);
+    return meshMorphData[bone];
+  }
+
+  const playMorphTargetBack = function (obj, blendshape, amount) {    
+    let meshMorphData=getMeshMorphData(obj);
+    meshMorphData[blendshape] = amount;
+  }
+
+
+  const playMorphTarget = function (obj, blendshape, amount) {
+    let meshMorphData=getMeshMorphData(obj);
+
+    meshMorphData['bs'].map(function (o, i) {
+      if (o.morphTargetInfluences && o.userData.targetNames) {
+        var pos = o.userData.targetNames.findIndex(item => blendshape.toLowerCase() === item.toLowerCase());
+        if (pos === -1) return;
+
+        o.morphTargetInfluences[pos] = amount;
+      }
+
+    });
+  }
