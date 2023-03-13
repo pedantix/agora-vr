@@ -8,8 +8,8 @@ const easyrtc = require("open-easyrtc");      // EasyRTC external module
 // Set process name
 process.title = "networked-aframe-server";
 
-// Get port or default to 5832
-const port = process.env.PORT || 5832;
+// Get port or default to 7373
+const port = process.env.PORT || 7373;
 
 // Setup and configure Express http server.
 const app = express();

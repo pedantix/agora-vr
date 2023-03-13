@@ -594,7 +594,14 @@ class AgoraRtcAdapter {
 
     // Publish the local video and audio tracks to the channel.
     if (this.enableVideo || this.enableAudio || this.enableAvatar) {
-      await this.agoraClient.publish(Object.values(this.localTracks));
+
+	if (this.localTracks.audioTrack)
+           await this.agoraClient.publish(this.localTracks.audioTrack);
+      
+        if (this.localTracks.videoTrack)
+           await this.agoraClient.publish(this.localTracks.videoTrack);
+
+
       console.log("publish success");
     }
   }
