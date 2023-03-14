@@ -144,7 +144,7 @@ function onResultsFaceMesh(results) {
             drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, {color: '#E0E0E0'});
             */
 
-           drawLandmarks(canvasCtx, newArray, {color: '#FF0000'});
+           drawLandmarks(canvasCtx, newArray, {color: '#FF10F0', lineWidth: 2, radius: 2});
            //drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, { color: '#E0E0E0' });
         }
     }
