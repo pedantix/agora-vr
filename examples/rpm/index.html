@@ -1,4 +1,3 @@
-
 <html lang="en">
 
 <head>
@@ -42,87 +41,86 @@
     };
   </script>
 
-<script>
-  AFRAME.registerComponent('player-info', {
-    // notice that color and name are both listed in the schema; NAF will only keep
-    // properties declared in the schema in sync.
-    schema: {
-      name: { type: 'string', default: 'user-' + Math.round(Math.random() * 10000) },
-      gltfmodel: { type: 'string', default: '' }
-    },
+  <script>
+    AFRAME.registerComponent('player-info', {
+      // notice that color and name are both listed in the schema; NAF will only keep
+      // properties declared in the schema in sync.
+      schema: {
+        name: { type: 'string', default: 'user-' + Math.round(Math.random() * 10000) },
+        gltfmodel: { type: 'string', default: '' }
+      },
 
-    init: function () {
-      this.head = this.el.querySelector('.head');
-      this.nametag = this.el.querySelector('.nametag');
+      init: function () {
+        this.head = this.el.querySelector('.head');
+        this.nametag = this.el.querySelector('.nametag');
 
-      this.ownedByLocalUser = this.el.id === 'player';
-      if (this.ownedByLocalUser) {
-        // populate the html overlay with the correct name on init
-        this.nametagInput = document.getElementById('username-overlay');
-        this.nametagInput.value = this.data.name;
+        this.ownedByLocalUser = this.el.id === 'player';
+        if (this.ownedByLocalUser) {
+          // populate the html overlay with the correct name on init
+          this.nametagInput = document.getElementById('username-overlay');
+          this.nametagInput.value = this.data.name;
+        }
+      },
+
+      // here as an example, not used in current demo. Could build a user list, expanding on this.
+      listUsers: function () {
+        console.log(
+          'userlist',
+          [...document.querySelectorAll('[player-info]')].map((el) => el.components['player-info'].data.name)
+        );
+      },
+
+      update: function () {
+        if (this.head) this.head.setAttribute('gltf-model', this.data.gltfmodel);
+        if (this.nametag) this.nametag.setAttribute('value', this.data.name);
       }
-    },
+    });
+  </script>
 
-    // here as an example, not used in current demo. Could build a user list, expanding on this.
-    listUsers: function () {
-      console.log(
-        'userlist',
-        [...document.querySelectorAll('[player-info]')].map((el) => el.components['player-info'].data.name)
-      );
-    },
 
-    update: function () {
-      if (this.head) this.head.setAttribute('gltf-model', this.data.gltfmodel);
-      if (this.nametag) this.nametag.setAttribute('value', this.data.name);
+  <style>
+    .videoUI {
+      position: fixed;
+      bottom: 0px;
+      left: 0px;
+      width: 320px;
+      height: 90px;
+      z-index: 15;
+      opacity: 1.0;
+      pointer-events: none;
+      /* allow click-through in transparent areas */
     }
-  });
-</script>
 
-
-<style>
-  .videoUI {
-    position: fixed;
-    bottom: 0px;
-    left: 0px;
-    width: 320px;
-    height: 90px;
-    z-index: 15;
-    opacity:1.0;
-    pointer-events: none; /* allow click-through in transparent areas */
-}
-
-  .frame {
+    .frame {
       width: 90%;
       height: 90%;
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans,
-          Droid Sans, Helvetica Neue, sans-serif;
+        Droid Sans, Helvetica Neue, sans-serif;
       padding: 5%;
       padding-top: 2%;
       font-size: 14px;
       border: none;
       position: absolute;
       z-index: 1000;
-  }
+    }
 
-  .warning {
+    .warning {
       background-color: #df68a2;
       padding: 3px;
       border-radius: 5px;
       color: white;
-  }
-</style>
+    }
+  </style>
 </head>
+
 <body>
 
-<iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write" ihidden ></iframe>
-<input
-  id="username-overlay"
-  style="z-index: 100; bottom: 24px; left: -1148px; position: fixed"
-  oninput="document.getElementById('player').setAttribute('player-info', 'name', this.value)"
-/>
+  <iframe id="frame" class="frame" allow="camera *; microphone *; clipboard-write" ihidden></iframe>
+  <input id="username-overlay" style="z-index: 100; bottom: 24px; left: -1148px; position: fixed"
+    oninput="document.getElementById('player').setAttribute('player-info', 'name', this.value)" />
 
-<!--
+  <!--
 <button
   id="gesture"
   style="z-index: 100; width:60px; height:60px; bottom: 24px; left: 24px; position: fixed"
@@ -130,8 +128,7 @@
 >
   Click Me
 </button>-->
-<a-scene 
-networked-scene="
+  <a-scene networked-scene="
       app: 20b7c51ff4c644ab80cf5a4e646b0537;
       room: {'name':'test1', 'vbg0':false, 'showLocal': false};
       connectOnLoad: false;
@@ -139,31 +136,23 @@ networked-scene="
       adapter: agorartc;
       audio: true;
       video: false;
-    "
+    " renderer="colorManagement: true; physicallyCorrectLights:true;" light="defaultLightsEnabled: false">
+    <a-assets>
+      <template id="rig-template">
+        <a-entity></a-entity>
+      </template>
 
-  renderer="colorManagement: true; physicallyCorrectLights:true;" light="defaultLightsEnabled: false"
->
-  <a-assets>
-    <template id="rig-template">
-      <a-entity></a-entity>
-    </template>
+      <template id="head-template">
+        <a-entity class="avatar" player-info networked-audio-source>
+          <a-entity class="head" gltf-model="?" shadow="cast: true" rotation="0 180 0" position="0 -2.3 0"
+            scale="1.4 1.4 1.4" ifix-avatar-rotation=""></a-entity>
 
-    <template id="head-template">
-      <a-entity class="avatar" player-info networked-audio-source>
-        <a-entity class="head" gltf-model="?" shadow="cast: true" rotation="0 180 0" position="0 -2.3 0"  scale="1.4 1.4 1.4" fix-avatar-rotation=""></a-entity> 
-
-        <!-- here we add a text component for a nametag; the value will be updated by the player-info component -->
-        <a-text
-          class="nametag"
-          value="?"
-          rotation="0 180 0"
-          position=".25 -.35 0"
-          side="double"
-          scale=".5 .5 .5"
-        ></a-text>
-      </a-entity>
-    </template>
-  </a-assets>
+          <!-- here we add a text component for a nametag; the value will be updated by the player-info component -->
+          <a-text class="nametag" value="?" rotation="0 180 0" position=".25 -.35 0" side="double"
+            scale=".5 .5 .5"></a-text>
+        </a-entity>
+      </template>
+    </a-assets>
 
 
     <!-- Assets -->
@@ -184,50 +173,61 @@ networked-scene="
     <a-entity id="hangar" shadow="cast: false" visible="true" gltf-model="#hangari"></a-entity>
     <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
 
-  <a-entity id="rig" movement-controls networked="template:#rig-template;">
-    <a-entity
-      id="player"
-      camera
-      position="0 2.3 0"
-      look-controls
-      networked="template:#head-template;"
-      visible="true"
-    >  
-    <a-entity id="self-view" 
-    gltf-model="?" 
-    position="0 -2.1 -0.25" rotation="-25 0 0" scale="1.1 1 1" ></a-entity>
-   <!-- position="-2 -4.3 -1.4" rotation="-10 60 -2" scale="2 2 2" ></a-entity> -->
-  </a-entity>
-  </a-entity>
-</a-scene>
- 
-<div class="videoUI" >
-  <div class="video-canvas-container">
-    <canvas id="canvas_secret" class="output_canvas" width="200px" height="150px"
-      style="display:none; width:160px; height:90px; border: 0px solid white;"></canvas>
+    <a-entity id="rig" movement-controls networked="template:#rig-template;">
+      <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
+        <a-entity id="self-view" gltf-model="./assets/ben.glb" position="0 -2.1 -0.25" rotation="-25 0 0"
+          scale="1.1 1 1"></a-entity>
+        <!-- position="-2 -4.3 -1.4" rotation="-10 60 -2" scale="2 2 2" ></a-entity> -->
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <div class="videoUI">
+    <div class="video-canvas-container">
+      <canvas id="canvas_secret" class="output_canvas" width="200px" height="150px"
+        style="display:none; width:160px; height:90px; border: 0px solid white;"></canvas>
+    </div>
+    <div class="video-canvas-container"
+      style="display:none; width: 160px; height: 90px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
+      <video crossorigin="anonymous" controls="false" preload='auto' playsinline autoplay
+        style="width: 320px; height: 180px;" id="local_video" class="player">
+    </div>
   </div>
-  <div class="video-canvas-container" style="display:none; width: 160px; height: 90px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
-    <video crossorigin="anonymous" controls="false" preload='auto' playsinline autoplay style="width: 320px; height: 180px;" id="local_video" class="player"></div>
   </div>
-</div>
 
   <script src="./js/script.js"></script>
 
   <script>
-    const constraints = {
-                          video: { width: 320, height: 180,rameRate: 15 },
-                          audio: true
-                        };
-  
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-      camera.start();
-      document.querySelector('a-scene').emit('connect');
-    });
-    </script>
 
-<script>
+    document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
+        let obj = document.getElementById("self-view").object3D;
+        let height= avatarHeight(obj);
+        console.error(height);
+        obj.position.set(0, (-0.1 - height), -0.25);
+      });
+    var mediapipe = getParameterByName("mediapipe");
+
+    if (!mediapipe || mediapipe === "true") {
+
+
+      const constraints = {
+        video: { width: 320, height: 180, rameRate: 15 },
+        audio: true
+      };
+
+      navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        camera.start();
+        document.querySelector('a-scene').emit('connect');
+      });
+    } else {
+      document.querySelector('a-scene').emit('connect');
+    }
+
+
+
   //displayIframe();
    //document.getElementById('player').setAttribute('player-info', 'gltfmodel', "./assets/RPM.glb"); 
-</script>
+  </script>
 </body>
+
 </html>

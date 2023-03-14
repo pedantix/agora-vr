@@ -5,6 +5,19 @@ frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi`;
 window.addEventListener('message', subscribe);
 document.addEventListener('message', subscribe);
 
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    var ret= decodeURIComponent(results[2].replace(/\+/g, ' '));
+    if (ret && ret.length>0)
+      return ret;
+    else
+      return null;
+  }
+
 function subscribe(event) {
     const json = parse(event);
     if (json?.source !== 'readyplayerme') {
@@ -38,6 +51,8 @@ function subscribe(event) {
     if (json.eventName === 'v1.user.set') {
         console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
     }
+
+    console.warn("json",json);
 }
 
 function parse(event) {
@@ -229,6 +244,7 @@ function getMeshMorphData(obj) {
     if (meshMorphData.length==0) {
         delete MorphData[obj.uuid];
     }
+
     return meshMorphData;
 }
 
@@ -282,4 +298,9 @@ const readBlendshapesFromAvatar = function (meshMorphData, mesh) {
       }
 
     });
+  }
+
+  function avatarHeight(obj) {
+    var box = new THREE.Box3().setFromObject( obj );
+   return box.max.y-box.min.y;
   }
