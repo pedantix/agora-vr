@@ -122,6 +122,14 @@
   oninput="document.getElementById('player').setAttribute('player-info', 'name', this.value)"
 />
 
+
+<button
+  id="gesture"
+  style="z-index: 100; width:60px; height:60px; bottom: 24px; left: 24px; position: fixed"
+  onclick="camera.start();"
+>
+  Click Me
+</button>
 <a-scene 
 networked-scene="
       app: 20b7c51ff4c644ab80cf5a4e646b0537;
@@ -199,7 +207,7 @@ networked-scene="
       style="width:320px; height:180px; border: 0px solid white;"></canvas>
   </div>
   <div class="video-canvas-container" style="display:none; width: 320px; height: 180px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
-    <video  style="width: 320px; height: 180px;" id="local_video" class="player"></div>
+    <video autoplay style="width: 320px; height: 180px;" id="local_video" class="player"></div>
   </div>
 </div>
 
@@ -212,7 +220,7 @@ networked-scene="
                         };
   
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-      camera.start();
+     
       document.querySelector('a-scene').emit('connect')
     });
     </script>
