@@ -174,13 +174,13 @@ const faceMesh = new FaceMesh({
 faceMesh.setOptions({
     selfieMode: true,
     maxNumFaces: 1,
-    refineLandmarks: true,
+    refineLandmarks: false,
     minDetectionConfidence: 0.5,
     minTrackingConfidence: 0.5
 });
 
 faceMesh.onResults(onResultsFaceMesh);
-
+/*
 const pose = new Pose({
     locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
@@ -196,13 +196,14 @@ pose.setOptions({
 });
 
 pose.onResults(onResultsPose);
+*/
 const camera = new Camera(video, {
     onFrame: async () => {
         await faceMesh.send({ image: video });
      //   await pose.send({ image: video });
     },
-    width: 640,
-    height: 360,
+    width: 320,
+    height: 180,
     frameRate: 15
 });
 
