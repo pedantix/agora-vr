@@ -64,7 +64,7 @@ function handleMocap(csv) {
 window.handleMocap = handleMocap;
 const video = document.getElementById('local_video');
 const out = document.getElementById('canvas_secret');
-const canvasCtx = out.getContext('2d');
+//const canvasCtx = out.getContext('2d');
 
 var WIDTH = 1280;
 var HEIGHT = 720;
@@ -93,9 +93,9 @@ const BOTTOM_LIP = 14;
 
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, out.width, out.height);
-    canvasCtx.drawImage(results.image, 0, 0, out.width, out.height);
+//    canvasCtx.save();
+//    canvasCtx.clearRect(0, 0, out.width, out.height);
+//    canvasCtx.drawImage(results.image, 0, 0, out.width, out.height);
 
     if (results.multiFaceLandmarks && getBone(document.getElementById("self-view").object3D,'head')) {
         for (const landmarks of results.multiFaceLandmarks) {
@@ -144,11 +144,11 @@ function onResultsFaceMesh(results) {
             drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, {color: '#E0E0E0'});
             */
 
-           drawLandmarks(canvasCtx, newArray, {color: '#FF10F0', lineWidth: 2, radius: 2});
+          // drawLandmarks(canvasCtx, newArray, {color: '#FF10F0', lineWidth: 2, radius: 2});
            //drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, { color: '#E0E0E0' });
         }
     }
-    canvasCtx.restore();
+  //  canvasCtx.restore();
 }
 
 function onResultsPose(results) {
@@ -199,10 +199,11 @@ pose.onResults(onResultsPose);
 const camera = new Camera(video, {
     onFrame: async () => {
         await faceMesh.send({ image: video });
-        await pose.send({ image: video });
+     //   await pose.send({ image: video });
     },
     width: 640,
-    height: 360
+    height: 360,
+    frameRate: 15
 });
 
 
