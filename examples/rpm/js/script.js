@@ -204,7 +204,8 @@ const camera = new Camera(video, {
     width: 640,
     height: 360
 });
-camera.start();
+
+
 
 /*
 window.head.rotation.x=-0.6*blendshapes_values[52]/60;
