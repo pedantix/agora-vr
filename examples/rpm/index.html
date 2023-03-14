@@ -204,6 +204,9 @@
   <script>
     
     function handleMocap(csv) {
+      getBone(document.getElementById("self-view").object3D,'head').rotation.z=0.6;
+      getBone(document.getElementById("self-view").object3D,'head').rotation.y=0.6;
+      getBone(document.getElementById("self-view").object3D,'head').rotation.x=0.6;
       console.log(csv);
     }
 

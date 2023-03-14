@@ -71,12 +71,7 @@ function showSelf() {
 
 }
 
-function handleMocap(csv) {
-    alert(csv);
-}
 
-// MediaPipe
-window.handleMocap = handleMocap;
 const video = document.getElementById('local_video');
 const out = document.getElementById('canvas_secret');
 //const canvasCtx = out.getContext('2d');
@@ -123,9 +118,13 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[BOTTOM]);
             newArray.push(landmarks[LEFT_LIP]);
             newArray.push(landmarks[RIGHT_LIP]);
-            getBone(document.getElementById("self-view").object3D,'head').rotation.z=-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
-            getBone(document.getElementById("self-view").object3D,'head').rotation.y=3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
-            getBone(document.getElementById("self-view").object3D,'head').rotation.x=-0.4+(-2*(landmarks[TOP].z-landmarks[BOTTOM].z))  ;
+            getBone(document.getElementById("self-view").object3D,'head').rotation.z=0.6*-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
+            getBone(document.getElementById("self-view").object3D,'head').rotation.y=0.6*3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
+            getBone(document.getElementById("self-view").object3D,'head').rotation.x=-0.6*0.4+(-2*(landmarks[TOP].z-landmarks[BOTTOM].z))  ;
+            getBone(document.getElementById("self-view").object3D,'neck').rotation.z=0.4*-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
+            getBone(document.getElementById("self-view").object3D,'neck').rotation.y=0.4*3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
+            getBone(document.getElementById("self-view").object3D,'neck').rotation.x=-0.4+0.4*(-2*(landmarks[TOP].z-landmarks[BOTTOM].z))  ;
+
             playMorphTarget(document.getElementById("self-view").object3D,'jawOpen',4*(landmarks[BOTTOM_LIP].y-landmarks[TOP_LIP].y));
             //getBone(document.getElementById("self-view").object3D,'head').rotation.x=0
            // console.log("Y", landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z, landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z);
