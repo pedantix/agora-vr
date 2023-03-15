@@ -176,14 +176,19 @@
     <!-- World -->
     <a-entity id="hangar" shadow="cast: false" visible="true" gltf-model="#hangari"></a-entity>
     <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
-
+  
     <a-entity id="rig" movement-controls networked="template:#rig-template;">
       <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
-        <a-entity id="self-view" gltf-model="./assets/ben.glb" position="0 -2.1 -0.25" rotation="-25 0 0"
-          scale="1.3 1.2 1.2"></a-entity>
-        <!-- position="-2 -4.3 -1.4" rotation="-10 60 -2" scale="2 2 2" ></a-entity> -->
+        <a-entity id="self-view" gltf-model="?" position="0 -2.1 -0.25" rotation="-25 0 0"
+          scale="1.3 1.2 1.2">
+          <a-text id="loading" color="black" value="Loading Avatar" rotation="25 0 0" position="-0.23 0.12 -0.1" side="double"
+          scale="0.3 0.3 0.3"></a-text>
+          <a-entity id="self-view" gltf-model="./assets/Eye.glb" rotation="15 0 0" position="0 0.24 -0.3" side="double"
+          scale="0.3 0.3 0.3"></a-entity>
+        </a-entity>
       </a-entity>
     </a-entity>
+
   </a-scene>
 
   <div class="videoUI">
@@ -203,39 +208,36 @@
 
   <script>
     
-
-    document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
-        let obj = document.getElementById("self-view").object3D;
-        let height= avatarHeight(obj);
-        console.log("avatarHeight", height);
-        obj.position.set(0, (-0.1 - height), -0.25);
-      });
-
-
-    var mediapipe = getParameterByName("mediapipe");
-
-    if (!mediapipe || mediapipe === "true") {
-      const constraints = {
-        video: { width: 320, height: 180, rameRate: 15 },
-        audio: true
-      };
-
-      navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        camera.start();
-        document.querySelector('a-scene').emit('connect');
-      });
-    } else {
-      document.querySelector('a-scene').addEventListener('loaded', function () {        
-        document.querySelector('a-scene').emit('connect');
-      })
-      if (document.querySelector('a-scene').emit) {
-        document.querySelector('a-scene').emit('connect');
+  var letters = '0123456789ABCDEF';
+  let cc=0;
+  let ccinc=true;
+    function animateLoading(){
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[cc];
       }
-      
-    }
 
-  //displayIframe();
-   //document.getElementById('player').setAttribute('player-info', 'gltfmodel', "./assets/RPM.glb"); 
+      if (ccinc) {
+        cc++;
+      }
+      else {
+        cc--;
+      }
+
+      if (cc>12) {
+        cc--;
+        ccinc=false;
+      } else if (cc<0) {
+        cc++;
+        ccinc=true;
+      }
+      document.getElementById("loading").object3D.rotation.x -= Math.PI/32;
+      document.getElementById("loading").setAttribute('color',color);
+    }
+    setInterval(() => {
+      animateLoading();
+    }, 60);
+
   </script>
 </body>
 

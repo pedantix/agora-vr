@@ -1,8 +1,9 @@
 // Avatar SDK
 let self_loading=true;
+let camera;
 const subdomain = 'demo'; // Replace with your custom subdomain
 const frame = document.getElementById('frame');
-frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi`;
+frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
 window.addEventListener('message', subscribe);
 document.addEventListener('message', subscribe);
 
@@ -167,7 +168,6 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_EYE_UP]);
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
 
-
             let head_rotation_z = 0.6 * -3 * (landmarks[LEFT].y - landmarks[RIGHT].y);
             let head_rotation_y = 0.6 * 3 * (landmarks[LEFT].z - landmarks[RIGHT].z);
             let head_rotation_x = 0.4 + 0.6 * (-2 * (landmarks[TOP].z - landmarks[BOTTOM].z));
@@ -178,7 +178,7 @@ function onResultsFaceMesh(results) {
             let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
             let head_rotation_delta_x = Math.abs(head.rotation.x - head_rotation_x);
 
-            let delta_breach = 0.007;
+            let delta_breach = 0.012; // 0.007
             if (head_rotation_delta_z > delta_breach || head_rotation_delta_y > delta_breach || head_rotation_delta_x > delta_breach) {
                 //                console.log("delta",head_rotation_delta_z,head_rotation_delta_y,head_rotation_delta_x);
                 head.rotation.z = head_rotation_z;
@@ -212,10 +212,10 @@ function onResultsFaceMesh(results) {
             let left_eye_h = ldistance(landmarks[LEFT_EYE_LEFT], landmarks[LEFT_EYE_RIGHT]);
             let right_eye = ldistance(landmarks[RIGHT_EYE_UP], landmarks[RIGHT_EYE_DOWN]);
             let right_eye_h = ldistance(landmarks[RIGHT_EYE_LEFT], landmarks[RIGHT_EYE_RIGHT]);
-            console.log(
+           /* console.log(
                 "LEFT", left_eye_h / left_eye,
                 "RIGHT", right_eye_h / right_eye
-            );
+            ); */
             let facesize = TOP - CENTER_BELOW_NOSE;
             let left_up = (20 * (left - (0.14 * top / 0.46)))
             let right_up = (20 * (right - (0.14 * top / 0.46)))
@@ -324,7 +324,7 @@ if (!mediapipe || mediapipe === "true") {
     
     pose.onResults(onResultsPose);
     */
-    const camera = new Camera(video, {
+     camera = new Camera(video, {
         onFrame: async () => {
             await faceMesh.send({ image: video });
             //   await pose.send({ image: video });
@@ -443,6 +443,21 @@ function handleMocap(csv) {
     head.rotation.z = -0.6 * blendshapes_values[54];
     neck.rotation.z = -0.4 * blendshapes_values[54];
 }
+
+    ///add Q and E keyboard shortcuts to rotate left/right
+    document.addEventListener('keypress', (event) => {
+        var name = event.key;
+        var code = event.code;
+        
+        switch(code) {
+            case 'KeyE':
+              document.getElementById("rig").object3D.rotation.y -= Math.PI/16;
+              break;
+            case 'KeyQ':
+              document.getElementById("rig").object3D.rotation.y += Math.PI/16;
+              break;
+          }
+      }, false);
 
 // MediaPipe
 window.handleMocap = handleMocap;
