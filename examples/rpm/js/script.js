@@ -417,7 +417,10 @@ function avatarHeight(obj) {
 
 let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
 
+
+// iOS ArKit52
 function handleMocap(csv) {
+
     let obj = document.getElementById("self-view").object3D;
     let blendshapes_values = csv.split(',');
     for (let i = 0; i < rpm_blendshapes.length; i++) {
@@ -426,12 +429,12 @@ function handleMocap(csv) {
 
     let head = getBone(obj, 'head');
     let neck = getBone(obj, 'neck');
-    head.rotation.x = -0.6 * blendshapes_values[53];
-    neck.rotation.x = -0.4 * blendshapes_values[53];
-    head.rotation.y = 0.6 * blendshapes_values[54];
-    neck.rotation.y = 0.4 * blendshapes_values[54];
-    head.rotation.z = 0.6 * blendshapes_values[52];
-    neck.rotation.z = 0.4 * blendshapes_values[52];
+    head.rotation.x = 0.6 * blendshapes_values[53];
+    neck.rotation.x = 0.4 * blendshapes_values[53];
+    head.rotation.y = 0.6 * blendshapes_values[52];
+    neck.rotation.y = 0.4 * blendshapes_values[52];
+    head.rotation.z = 0.6 * blendshapes_values[54];
+    neck.rotation.z = 0.4 * blendshapes_values[54];
 }
 
 // MediaPipe
