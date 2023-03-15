@@ -485,11 +485,10 @@ class AgoraRtcAdapter {
       const clientMediaStreams = that.mediaStreams[clientId] = that.mediaStreams[clientId] || {};
 
       if (mediaType === 'audio') {
-        user.audioTrack.play();
-
+        //user.audioTrack.play();
         const audioStream = new MediaStream();
+        audioStream.addTrack(user.audioTrack._mediaStreamTrack);
         console.log("user.audioTrack ", user.audioTrack._mediaStreamTrack);
-        //audioStream.addTrack(user.audioTrack._mediaStreamTrack);
         clientMediaStreams.audio = audioStream;
         if (pendingMediaRequests) pendingMediaRequests.audio.resolve(audioStream);
       }

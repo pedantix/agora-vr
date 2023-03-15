@@ -88,7 +88,7 @@
       bottom: 0px;
       left: 0px;
       width: 320px;
-      height: 90px;
+      height: 180px;
       z-index: 15;
       opacity: 1.0;
       pointer-events: none;
@@ -180,7 +180,7 @@
     <a-entity id="rig" movement-controls networked="template:#rig-template;">
       <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
         <a-entity id="self-view" gltf-model="./assets/ben.glb" position="0 -2.1 -0.25" rotation="-25 0 0"
-          scale="1.1 1 1"></a-entity>
+          scale="1.3 1.2 1.2"></a-entity>
         <!-- position="-2 -4.3 -1.4" rotation="-10 60 -2" scale="2 2 2" ></a-entity> -->
       </a-entity>
     </a-entity>
@@ -189,7 +189,7 @@
   <div class="videoUI">
     <div class="video-canvas-container">
       <canvas id="canvas_secret" class="output_canvas" width="200px" height="150px"
-        style="display:none; width:160px; height:90px; border: 0px solid white;"></canvas>
+        style=" width:320px; height:180px; border: 0px solid white;"></canvas>
     </div>
     <div class="video-canvas-container"
       style="display:none; width: 160px; height: 90px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
@@ -203,27 +203,18 @@
 
   <script>
     
-    function handleMocap(csv) {
-      getBone(document.getElementById("self-view").object3D,'head').rotation.z=0.6;
-      getBone(document.getElementById("self-view").object3D,'head').rotation.y=0.6;
-      getBone(document.getElementById("self-view").object3D,'head').rotation.x=0.6;
-      console.log(csv);
-    }
-
-    // MediaPipe
-    window.handleMocap = handleMocap;
 
     document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
         let obj = document.getElementById("self-view").object3D;
         let height= avatarHeight(obj);
-        console.error(height);
+        console.log("avatarHeight", height);
         obj.position.set(0, (-0.1 - height), -0.25);
       });
+
+
     var mediapipe = getParameterByName("mediapipe");
 
     if (!mediapipe || mediapipe === "true") {
-
-
       const constraints = {
         video: { width: 320, height: 180, rameRate: 15 },
         audio: true
@@ -234,10 +225,14 @@
         document.querySelector('a-scene').emit('connect');
       });
     } else {
-      document.querySelector('a-scene').emit('connect');
+      document.querySelector('a-scene').addEventListener('loaded', function () {        
+        document.querySelector('a-scene').emit('connect');
+      })
+      if (document.querySelector('a-scene').emit) {
+        document.querySelector('a-scene').emit('connect');
+      }
+      
     }
-
-
 
   //displayIframe();
    //document.getElementById('player').setAttribute('player-info', 'gltfmodel', "./assets/RPM.glb"); 
