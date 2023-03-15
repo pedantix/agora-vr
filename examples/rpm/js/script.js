@@ -1,4 +1,5 @@
 // Avatar SDK
+let self_loading=true;
 const subdomain = 'demo'; // Replace with your custom subdomain
 const frame = document.getElementById('frame');
 frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi`;
@@ -43,6 +44,7 @@ function subscribe(event) {
         document.getElementById('frame').hidden = true;
         let v = json.data.url + "?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
         MorphData = {};
+        self_loading=true;
         document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
         //   document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
@@ -422,6 +424,11 @@ let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOute
 function handleMocap(csv) {
 
     let obj = document.getElementById("self-view").object3D;
+    if (!obj || self_loading) {
+        return;
+    }
+
+    console.log(Date.now());
     let blendshapes_values = csv.split(',');
     for (let i = 0; i < rpm_blendshapes.length; i++) {
         playMorphTarget(obj, rpm_blendshapes[i], blendshapes_values[i]);
@@ -431,10 +438,10 @@ function handleMocap(csv) {
     let neck = getBone(obj, 'neck');
     head.rotation.x = 0.6 * blendshapes_values[53];
     neck.rotation.x = 0.4 * blendshapes_values[53];
-    head.rotation.y = 0.6 * blendshapes_values[52];
-    neck.rotation.y = 0.4 * blendshapes_values[52];
-    head.rotation.z = 0.6 * blendshapes_values[54];
-    neck.rotation.z = 0.4 * blendshapes_values[54];
+    head.rotation.y = -0.6 * blendshapes_values[52];
+    neck.rotation.y = -0.4 * blendshapes_values[52];
+    head.rotation.z = -0.6 * blendshapes_values[54];
+    neck.rotation.z = -0.4 * blendshapes_values[54];
 }
 
 // MediaPipe
@@ -445,6 +452,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     let height = avatarHeight(obj);
     console.log("avatarHeight", height);
     obj.position.set(0, (-0.1 - height), -0.25);
+    self_loading=false;
 });
 
 
