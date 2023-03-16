@@ -1,5 +1,5 @@
 // Avatar SDK
-let self_loading=true;
+let self_loading = true;
 let camera;
 const subdomain = 'demo'; // Replace with your custom subdomain
 const frame = document.getElementById('frame');
@@ -45,7 +45,7 @@ function subscribe(event) {
         document.getElementById('frame').hidden = true;
         let v = json.data.url + "?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
         MorphData = {};
-        self_loading=true;
+        self_loading = true;
         document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
         //   document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
@@ -134,15 +134,87 @@ function ldistance(x, y) {
 
 }
 
+
+let avatar_style = 'nico';
+function swivelHead(obj, roll, yaw, pitch) {
+
+    if (avatar_style == 'rpm') {
+        let head_rotation_z = 0.6 * -3 * roll;
+        let head_rotation_y = 0.6 * 3 * yaw;
+        let head_rotation_x = 0.4 + 0.6 * (-2 * pitch);
+        let head = getBone(obj, 'head');
+        let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
+        let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
+        let head_rotation_delta_x = Math.abs(head.rotation.x - head_rotation_x);
+        let delta_breach = 0.012; // 0.007
+        if (head_rotation_delta_z > delta_breach || head_rotation_delta_y > delta_breach || head_rotation_delta_x > delta_breach) {
+            //                console.log("delta",head_rotation_delta_z,head_rotation_delta_y,head_rotation_delta_x);
+            head.rotation.z = head_rotation_z;
+            head.rotation.y = head_rotation_y;
+            head.rotation.x = head_rotation_x;
+            let neck = getBone(obj, 'neck');
+            if (neck) {
+                neck.rotation.z = 0.4 * -3 * roll;
+                neck.rotation.y = 0.4 * 3 * yaw;
+                neck.rotation.x = -0.3 + 0.4 * pitch;
+            }
+        }
+    } else if (avatar_style == 'mh') {
+        let head_rotation_x = 0.6 * -3 * roll;
+        let head_rotation_z = -0.25 + 0.6 * 3 * pitch;
+        let head_rotation_y = 0.6 * (3 * yaw);
+        let head = getBone(obj, 'head');
+        let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
+        let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
+        let head_rotation_delta_x = Math.abs(head.rotation.x - head_rotation_x);
+        let delta_breach = 0.012; // 0.007
+        if (head_rotation_delta_z > delta_breach || head_rotation_delta_y > delta_breach || head_rotation_delta_x > delta_breach) {
+            //                console.log("delta",head_rotation_delta_z,head_rotation_delta_y,head_rotation_delta_x);
+            head.rotation.z = head_rotation_z;
+            head.rotation.y = head_rotation_y;
+            head.rotation.x = head_rotation_x;
+            let neck = getBone(obj, 'neck');
+            if (neck) {
+                neck.rotation.x = 0.4 * -3 * roll;
+                neck.rotation.z = -0.25 + 0.4 * 3 * pitch;
+                neck.rotation.y = 0.4 * (3 * yaw);
+            }
+        }
+    }else if (avatar_style == 'nico') {
+        let head_rotation_x = 0.6 * 3 * roll;
+        let head_rotation_z = -0.1 + 0.6 * -3 * pitch;
+        let head_rotation_y = 0.6 * (3 * yaw);
+        let head = getBone(obj, 'head');
+        let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
+        let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
+        let head_rotation_delta_x = Math.abs(head.rotation.x - head_rotation_x);
+        let delta_breach = 0.012; // 0.007
+        if (head_rotation_delta_z > delta_breach || head_rotation_delta_y > delta_breach || head_rotation_delta_x > delta_breach) {
+            //                console.log("delta",head_rotation_delta_z,head_rotation_delta_y,head_rotation_delta_x);
+            head.rotation.z = head_rotation_z;
+            head.rotation.y = head_rotation_y;
+            head.rotation.x = head_rotation_x;
+            let neck = getBone(obj, 'neck');
+            if (neck) {
+                neck.rotation.x = 0.4 * 3 * roll;
+                neck.rotation.z = -0.1 + 0.4 * -3 * pitch;
+                neck.rotation.y = 0.4 * (3 * yaw);
+
+
+            }
+        }
+    }
+
+}
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, out.width, out.height);
     canvasCtx.drawImage(results.image, 0, 0, out.width, out.height);
-
-    if (results.multiFaceLandmarks && getBone(document.getElementById("self-view").object3D, 'head')) {
+    let obj = document.getElementById("self-view").object3D;
+    if (results.multiFaceLandmarks && obj && getBone(obj, 'head')) {
         for (const landmarks of results.multiFaceLandmarks) {
-            let obj = document.getElementById("self-view").object3D;
+
             var newArray = [];
             newArray.push(landmarks[NOSE]);
             newArray.push(landmarks[NASAL]);
@@ -168,36 +240,8 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_EYE_UP]);
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
 
-            let head_rotation_z = 0.6 * -3 * (landmarks[LEFT].y - landmarks[RIGHT].y);
-            let head_rotation_y = 0.6 * 3 * (landmarks[LEFT].z - landmarks[RIGHT].z);
-            let head_rotation_x = 0.4 + 0.6 * (-2 * (landmarks[TOP].z - landmarks[BOTTOM].z));
+            swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
 
-            let head = getBone(document.getElementById("self-view").object3D, 'head');
-
-            let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
-            let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
-            let head_rotation_delta_x = Math.abs(head.rotation.x - head_rotation_x);
-
-            let delta_breach = 0.012; // 0.007
-            if (head_rotation_delta_z > delta_breach || head_rotation_delta_y > delta_breach || head_rotation_delta_x > delta_breach) {
-                //                console.log("delta",head_rotation_delta_z,head_rotation_delta_y,head_rotation_delta_x);
-                head.rotation.z = head_rotation_z;
-                head.rotation.y = head_rotation_y;
-                head.rotation.x = head_rotation_x;
-                let neck = getBone(obj, 'neck');
-                neck.rotation.z = 0.4 * -3 * (landmarks[LEFT].y - landmarks[RIGHT].y);
-                neck.rotation.y = 0.4 * 3 * (landmarks[LEFT].z - landmarks[RIGHT].z);
-                neck.rotation.x = -0.3 + 0.4 * (-2 * (landmarks[TOP].z - landmarks[BOTTOM].z));
-            }
-            /*
-            /*
-            getBone(document.getElementById("self-view").object3D,'head').rotation.z=0.6*-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
-            getBone(document.getElementById("self-view").object3D,'head').rotation.y=0.6*3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
-            getBone(document.getElementById("self-view").object3D,'head').rotation.x=-0.25+0.6*(-2*(landmarks[TOP].z-landmarks[BOTTOM].z))  ;
-            getBone(document.getElementById("self-view").object3D,'neck').rotation.z=0.4*-3*(landmarks[LEFT].y-landmarks[RIGHT].y)  ;
-            getBone(document.getElementById("self-view").object3D,'neck').rotation.y=0.4*3*(landmarks[LEFT].z-landmarks[RIGHT].z)  ;
-            getBone(document.getElementById("self-view").object3D,'neck').rotation.x=-0.15+0.4*(-2*(landmarks[TOP].z-landmarks[BOTTOM].z)) ;
-*/
             playMorphTarget(obj, 'jawOpen', 4 * (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y));
             playMorphTarget(obj, 'mouthSmileLeft', 7 * (landmarks[BOTTOM_LIP].y - landmarks[LEFT_LIP].y));
             playMorphTarget(obj, 'mouthSmileRight', 7 * (landmarks[BOTTOM_LIP].y - landmarks[RIGHT_LIP].y));
@@ -212,10 +256,7 @@ function onResultsFaceMesh(results) {
             let left_eye_h = ldistance(landmarks[LEFT_EYE_LEFT], landmarks[LEFT_EYE_RIGHT]);
             let right_eye = ldistance(landmarks[RIGHT_EYE_UP], landmarks[RIGHT_EYE_DOWN]);
             let right_eye_h = ldistance(landmarks[RIGHT_EYE_LEFT], landmarks[RIGHT_EYE_RIGHT]);
-           /* console.log(
-                "LEFT", left_eye_h / left_eye,
-                "RIGHT", right_eye_h / right_eye
-            ); */
+
             let facesize = TOP - CENTER_BELOW_NOSE;
             let left_up = (20 * (left - (0.14 * top / 0.46)))
             let right_up = (20 * (right - (0.14 * top / 0.46)))
@@ -225,47 +266,8 @@ function onResultsFaceMesh(results) {
             playMorphTarget(obj, 'browOuterUpLeft', left_up);
             playMorphTarget(obj, 'browOuterUpRight', right_up);
 
-            /*
-            playMorphTarget(obj,'browInnerUp',4000*positiveOrZero((landmarks[LEFT_BROW_UP].y-landmarks[LEFT].y)/facesize-0.001));
-             playMorphTarget(obj,'browOuterUpLeft',3000*positiveOrZero((landmarks[RIGHT_BROW_UP].y-landmarks[RIGHT].y)/facesize-0.001));
-             playMorphTarget(obj,'browOuterUpRight',3000*positiveOrZero((landmarks[LEFT_BROW_UP].y-landmarks[LEFT].y)/facesize-0.001));
- /*
-             //            playMorphTarget(obj,'browOuterUpRight',200*((landmarks[RIGHT_BROW_UP].y-landmarks[RIGHT].y)/facesize)-0.1);
- 
-             //getBone(document.getElementById("self-view").object3D,'head').rotation.x=0
-            // console.log("Y", landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z, landmarks[78].y-landmarks[308].y, "Z", landmarks[78].z-landmarks[308].z);
-             //newArray.push(landmarks[FACEMESH_LIPS[38][0]]);
- 
-             //newArray.push(landmarks[FACEMESH_LIPS[36][0]]);
-             //newArray.push(landmarks[FACEMESH_LIPS[35][0]]);
-             //*/
-
-            /*
-            for (let i = 0; i < 20; i++) {
-                var na = [];
-                na.push(landmarks[FACEMESH_LIPS[i][0]]);
-                var hex=decimalToHex(12*i,2);
-                var hexout="#"+hex+hex+hex;
-                drawLandmarks(canvasCtx, na, {color: hexout});
-              }
-            */
-            //newArray.push(landmarks[FACEMESH_LIPS[40][0]]);
-            //newArray.push(landmarks[FACEMESH_LIPS[5][0]]);
-            //drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: '#C0C0C070', lineWidth: 1});
-            /*
-        drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: '#C0C0C070', lineWidth: 1});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYE, {color: '#FF3030'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYEBROW, {color: '#FF3030'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_IRIS, {color: '#FF3030'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYE, {color: '#30FF30'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYEBROW, {color: '#30FF30'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_IRIS, {color: '#30FF30'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_FACE_OVAL, {color: '#E0E0E0'});
-        drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, {color: '#E0E0E0'});
-        */
-
             drawLandmarks(canvasCtx, newArray, { color: '#FF10F0', lineWidth: 2, radius: 2 });
-            //drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, { color: '#E0E0E0' });
+
         }
     }
     canvasCtx.restore();
@@ -324,7 +326,7 @@ if (!mediapipe || mediapipe === "true") {
     
     pose.onResults(onResultsPose);
     */
-     camera = new Camera(video, {
+    camera = new Camera(video, {
         onFrame: async () => {
             await faceMesh.send({ image: video });
             //   await pose.send({ image: video });
@@ -364,10 +366,11 @@ const readBlendshapesFromAvatar = function (meshMorphData, mesh) {
     meshMorphData['bs'] = [];
 
     mesh.traverse((o) => {
-        if (o.type == 'Bone') {
-            if (o.name == 'Neck') {
+        if (o.type == 'Bone' ) {
+           // console.log(o.name);
+            if (o.name == 'Neck' || o.name == 'Neck01' || o.name == 'Neck1_M') {
                 meshMorphData['neck'] = o;
-            } else if (o.name == 'Head') {
+            } else if (o.name == 'Head' || o.name == 'Head_M') {
                 meshMorphData['head'] = o;
             }
         }
@@ -397,7 +400,6 @@ const playMorphTargetBack = function (obj, blendshape, amount) {
     meshMorphData[blendshape] = amount;
 }
 
-
 const playMorphTarget = function (obj, blendshape, amount) {
     amount = blendshapeLimit(amount);
     let meshMorphData = getMeshMorphData(obj);
@@ -418,7 +420,6 @@ function avatarHeight(obj) {
 }
 
 let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
-
 
 // iOS ArKit52
 function handleMocap(csv) {
@@ -444,20 +445,20 @@ function handleMocap(csv) {
     neck.rotation.z = -0.4 * blendshapes_values[54];
 }
 
-    ///add Q and E keyboard shortcuts to rotate left/right
-    document.addEventListener('keypress', (event) => {
-        var name = event.key;
-        var code = event.code;
-        
-        switch(code) {
-            case 'KeyE':
-              document.getElementById("rig").object3D.rotation.y -= Math.PI/16;
-              break;
-            case 'KeyQ':
-              document.getElementById("rig").object3D.rotation.y += Math.PI/16;
-              break;
-          }
-      }, false);
+///add Q and E keyboard shortcuts to rotate left/right
+document.addEventListener('keypress', (event) => {
+    var name = event.key;
+    var code = event.code;
+
+    switch (code) {
+        case 'KeyE':
+            document.getElementById("rig").object3D.rotation.y -= Math.PI / 16;
+            break;
+        case 'KeyQ':
+            document.getElementById("rig").object3D.rotation.y += Math.PI / 16;
+            break;
+    }
+}, false);
 
 // MediaPipe
 window.handleMocap = handleMocap;
@@ -466,26 +467,36 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     let obj = document.getElementById("self-view").object3D;
     let height = avatarHeight(obj);
     console.log("avatarHeight", height);
-    obj.position.set(0, (-0.1 - height), -0.25);
-    self_loading=false;
+    if (avatar_style == 'nico') {
+        obj.position.set(0, -1.13, -0.35);
+    }
+    else if (avatar_style == 'rpm') {
+        obj.position.set(0, (-0.1 - height), -0.25);
+    }
+    else { //mh
+        obj.position.set(0, (-0.1 - height), 0);
+    }
+    self_loading = false;
 });
 
 
-if (!mediapipe || mediapipe === "true") {
-    const constraints = {
-        video: { width: 320, height: 180, rameRate: 15 },
-        audio: true
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        camera.start();
-        document.querySelector('a-scene').emit('connect');
-    });
-} else {
-    document.querySelector('a-scene').addEventListener('loaded', function () {
-        document.querySelector('a-scene').emit('connect');
-    })
-    if (document.querySelector('a-scene').emit) {
-        document.querySelector('a-scene').emit('connect');
+function init() {
+    if (!mediapipe || mediapipe === "true") {
+        const constraints = {
+            video: { width: 320, height: 180, rameRate: 15 },
+            audio: true
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            camera.start();
+        });
     }
+    document.querySelector('a-scene').emit('connect');
 }
+
+document.querySelector('a-scene').addEventListener('loaded', function () {
+    init()
+})
+if (document.querySelector('a-scene').emit) {
+    init();
+}
+
