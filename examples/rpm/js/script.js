@@ -1,4 +1,5 @@
 // Avatar SDK
+let avatar_style = 'nico';
 let self_loading = true;
 let camera;
 const subdomain = 'demo'; // Replace with your custom subdomain
@@ -135,13 +136,14 @@ function ldistance(x, y) {
 }
 
 
-let avatar_style = 'nico';
+
 function swivelHead(obj, roll, yaw, pitch) {
 
     if (avatar_style == 'rpm') {
-        let head_rotation_z = 0.6 * -3 * roll;
+        let head_rotation_x = 0.4 + 0.6 * -2 * pitch;
         let head_rotation_y = 0.6 * 3 * yaw;
-        let head_rotation_x = 0.4 + 0.6 * (-2 * pitch);
+        let head_rotation_z = 0.6 * -3 * roll;
+
         let head = getBone(obj, 'head');
         let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
         let head_rotation_delta_y = Math.abs(head.rotation.y - head_rotation_y);
@@ -154,9 +156,9 @@ function swivelHead(obj, roll, yaw, pitch) {
             head.rotation.x = head_rotation_x;
             let neck = getBone(obj, 'neck');
             if (neck) {
-                neck.rotation.z = 0.4 * -3 * roll;
+                neck.rotation.x = 0.4 * -2 * pitch;
                 neck.rotation.y = 0.4 * 3 * yaw;
-                neck.rotation.x = -0.3 + 0.4 * pitch;
+                neck.rotation.z = 0.4 * -3 * roll;
             }
         }
     } else if (avatar_style == 'mh') {
@@ -437,12 +439,33 @@ function handleMocap(csv) {
 
     let head = getBone(obj, 'head');
     let neck = getBone(obj, 'neck');
-    head.rotation.x = 0.6 * blendshapes_values[53];
-    neck.rotation.x = 0.4 * blendshapes_values[53];
-    head.rotation.y = -0.6 * blendshapes_values[52];
-    neck.rotation.y = -0.4 * blendshapes_values[52];
-    head.rotation.z = -0.6 * blendshapes_values[54];
-    neck.rotation.z = -0.4 * blendshapes_values[54];
+    let pitch = blendshapes_values[53];
+    let yaw = blendshapes_values[52];
+    let roll = blendshapes_values[54];
+
+    if (avatar_style == 'rpm') {
+        head.rotation.x = 0.6 * pitch;
+        neck.rotation.x = 0.4 * pitch;
+        head.rotation.y = -0.6 * yaw;
+        neck.rotation.y = -0.4 * yaw;
+        head.rotation.z = -0.6 * roll;
+        neck.rotation.z = -0.4 * roll;
+    } else if (avatar_style == 'mh') {
+        head.rotation.x = 0.6 * roll;
+        neck.rotation.x = 0.4 * roll;
+        head.rotation.y = -0.6 * yaw;
+        neck.rotation.y = -0.4 * yaw;
+        head.rotation.z = -0.6 * pitch;
+        neck.rotation.z = -0.4 * pitch;     
+    }else if (avatar_style == 'nico') {
+        head.rotation.x = -0.6 * roll;
+        neck.rotation.x = - 0.4 * roll;
+        head.rotation.y = -0.6 * yaw;
+        neck.rotation.y = -0.4 * yaw;
+        head.rotation.z = 0.6 * pitch;
+        neck.rotation.z = 0.4 * pitch;     
+    }    
+
 }
 
 ///add Q and E keyboard shortcuts to rotate left/right
