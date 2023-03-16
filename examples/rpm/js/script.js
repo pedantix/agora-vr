@@ -491,7 +491,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     let height = avatarHeight(obj);
     console.log("avatarHeight", height);
     if (avatar_style == 'nico') {
-        obj.position.set(0, -1.13, -0.35);
+        obj.position.set(0, -1.13, -0.45);
     }
     else if (avatar_style == 'rpm') {
         obj.position.set(0, (-0.1 - height), -0.25);
