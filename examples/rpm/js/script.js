@@ -462,8 +462,8 @@ function handleMocap(csv) {
         neck.rotation.x = - 0.4 * roll;
         head.rotation.y = -0.6 * yaw;
         neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.1+ 0.6 * pitch;
-        neck.rotation.z = -0.1+ 0.4 * pitch;     
+        head.rotation.z = -0.2+ 0.6 * pitch;
+        neck.rotation.z = -0.2+ 0.4 * pitch;     
     }    
 
 }
