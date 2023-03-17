@@ -52,9 +52,7 @@ function subscribe(event) {
         self_loading = true;
         document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
-        //   document.getElementById('player').setAttribute('player-info', 'gltfmodel', json.data.url+"?"+Math.random());           
-        //   document.getElementById("self-view").setAttribute('gltf-model',  json.data.url+"?"+Math.random());           
-    }
+     }
 
     // Get user id
     if (json.eventName === 'v1.user.set') {
@@ -557,9 +555,11 @@ document.addEventListener('keypress', (event) => {
 window.handleMocap = handleMocap;
 
 document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
+    if (e.target.id!="self-view")
+    return;
     let obj = document.getElementById("self-view").object3D;
     let height = avatarHeight(obj);
-    console.log("avatarHeight", height);
+    console.log("model-loaded", e);
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.1, -0.7);
         //obj.position.set(0, -1.13, -0.45);
@@ -574,6 +574,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
         obj.position.set(0, (-0.1 - height), 0);
     }
     self_loading = false;
+    // hide loader 
 });
 
 function init() {
