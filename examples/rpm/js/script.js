@@ -561,8 +561,10 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     let height = avatarHeight(obj);
     console.log("avatarHeight", height);
     if (avatar_style == 'nico') {
-        obj.position.set(0, -1.13, -0.45);
-        obj.rotation.set(-0.2, 0, 0);
+        obj.position.set(0, -0.99, -0.55);
+        //obj.position.set(0, -1.13, -0.45);
+        obj.rotation.set(0, 0, 0);
+        //obj.rotation.set(-0.2, 0, 0);
         obj.scale.set(1.3, 1.2, 1.2);
     }
     else if (avatar_style == 'rpm') {
@@ -580,13 +582,13 @@ function init() {
     if (avatar_style == 'nico') {
         self_loading = true;
         let v = './assets/NicoARKit.glb';
-        //document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
-        //   document.getElementById("self-view").setAttribute('gltf-model', v);
+        document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        document.getElementById("self-view").setAttribute('gltf-model', v);
     }
     else if (avatar_style == 'mh') {
         self_loading = true;
         let v = './assets/VivianARKit.glb';
-        //document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
 
     }
