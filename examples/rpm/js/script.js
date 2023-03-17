@@ -458,10 +458,10 @@ function handleMocap(csv) {
     }else if (avatar_style == 'nico') {
         head.rotation.x = -0.6 * roll;
         neck.rotation.x = - 0.4 * roll;
-        head.rotation.y = -0.6 * yaw;
-        neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.1+ 0.6 * pitch;
-        neck.rotation.z = -0.1+ 0.4 * pitch;     
+        head.rotation.y = 0.6 * yaw;
+        neck.rotation.y = 0.4 * yaw;
+        head.rotation.z =  0.6 * pitch;
+        neck.rotation.z =  0.4 * pitch;     
     }    
 
 }
