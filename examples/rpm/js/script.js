@@ -1,10 +1,9 @@
 // Avatar SDK
-let avatar_style = 'nico';
+
 let self_loading = true;
 let camera;
 const subdomain = 'demo'; // Replace with your custom subdomain
 const frame = document.getElementById('frame');
-frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
 window.addEventListener('message', subscribe);
 document.addEventListener('message', subscribe);
 
@@ -21,6 +20,10 @@ function getParameterByName(name, url = window.location.href) {
         return null;
 }
 
+var avatar_style = getParameterByName("avatar");
+if (!avatar_style) {
+    avatar_style = 'rpm';
+}
 var mediapipe = getParameterByName("mediapipe");
 
 function subscribe(event) {
@@ -74,9 +77,7 @@ function displayIframe() {
 }
 
 function showSelf() {
-
 }
-
 
 const video = document.getElementById('local_video');
 const out = document.getElementById('canvas_secret');
@@ -182,7 +183,7 @@ function swivelHead(obj, roll, yaw, pitch) {
                 neck.rotation.y = 0.4 * (3 * yaw);
             }
         }
-    }else if (avatar_style == 'nico') {
+    } else if (avatar_style == 'nico') {
         let head_rotation_x = 0.6 * 3 * roll;
         let head_rotation_z = -0.1 + 0.6 * -3 * pitch;
         let head_rotation_y = 0.6 * (3 * yaw);
@@ -338,14 +339,7 @@ if (!mediapipe || mediapipe === "true") {
 
 }
 
-/*
-window.head.rotation.x=-0.6*blendshapes_values[52]/60;
-window.head.rotation.y=0.6*blendshapes_values[53]/60;
-window.head.rotation.z=0.6*blendshapes_values[54]/60;    
-window.neck.rotation.x=-0.4*blendshapes_values[52]/60;
-window.neck.rotation.y=0.4*blendshapes_values[53]/60;
-window.neck.rotation.z=0.4*blendshapes_values[54]/60;
-*/
+
 let MorphData = {};
 
 function getMeshMorphData(obj) {
@@ -366,8 +360,8 @@ const readBlendshapesFromAvatar = function (meshMorphData, mesh) {
     meshMorphData['bs'] = [];
 
     mesh.traverse((o) => {
-        if (o.type == 'Bone' ) {
-           // console.log(o.name);
+        if (o.type == 'Bone') {
+            // console.log(o.name);
             if (o.name == 'Neck' || o.name == 'Neck01' || o.name == 'Neck1_M') {
                 meshMorphData['neck'] = o;
             } else if (o.name == 'Head' || o.name == 'Head_M') {
@@ -454,17 +448,95 @@ function handleMocap(csv) {
         head.rotation.y = -0.6 * yaw;
         neck.rotation.y = -0.4 * yaw;
         head.rotation.z = -0.6 * pitch;
-        neck.rotation.z = -0.4 * pitch;     
-    }else if (avatar_style == 'nico') {
+        neck.rotation.z = -0.4 * pitch;
+    } else if (avatar_style == 'nico') {
         head.rotation.x = -0.6 * roll;
         neck.rotation.x = - 0.4 * roll;
         head.rotation.y = 0.6 * yaw;
         neck.rotation.y = 0.4 * yaw;
-        head.rotation.z = -0.05+ 0.6 * pitch;
-        neck.rotation.z = -0.05+ 0.4 * pitch;     
-    }    
+        head.rotation.z = -0.05 + 0.6 * pitch;
+        neck.rotation.z = -0.05 + 0.4 * pitch;
+    }
 
 }
+
+// animate loader
+var letters = '0123456789ABCDEF';
+let cc = 0;
+let ccinc = true;
+
+let colori = 0;
+let light_colors = ["#0009FF", "#FF0100", "#FF00B1", "#FFE300", "#00FF0D", "FF6700", "#FF6EC7"];
+let disco=false;
+let music =new Audio('https://cdn.pixabay.com/audio/2022/08/24/audio_6f2bece4a8.mp3');
+function toggleDisco(){
+    disco=!disco;
+    if (disco) {
+    
+        music.play();
+    } else {
+        music.pause();
+    }
+}
+
+function animateDiscoLight() {
+
+    let light = document.getElementById("dl2");
+
+    if (!disco){
+        light.setAttribute('light', "color:#ffffee" );
+        light.setAttribute('light', "intensity:0");
+        return;
+    }
+
+    light.object3D.position.set(Math.random() * 10, Math.random() * 10, Math.random() * 10);    
+    light.setAttribute('light', "color:" + light_colors[colori]);
+    colori++;
+    if (colori>light_colors.length) {
+        colori=0;
+    }
+    light.setAttribute('light', "intensity:" + 2+Math.random*2);
+}
+
+function animateLoading() {
+    if (disco) {
+        document.getElementById("rig").object3D.rotation.y -= Math.PI / 30;
+    }
+    if (!document.getElementById("loading")) {
+        return;
+    }
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[cc];
+    }
+
+    if (ccinc) {
+        cc++;
+    }
+    else {
+        cc--;
+    }
+
+    if (cc > 12) {
+        cc--;
+        ccinc = false;
+    } else if (cc < 0) {
+        cc++;
+        ccinc = true;
+    }
+    document.getElementById("loading").object3D.rotation.x -= Math.PI / 64;
+    document.getElementById("loadeye").object3D.rotation.z -= Math.PI / 64;
+    document.getElementById("loading").setAttribute('color', color);
+}
+setInterval(() => {
+    animateLoading();
+}, 30);
+
+setInterval(() => {
+    animateDiscoLight();
+}, 120);
+
+
 
 ///add Q and E keyboard shortcuts to rotate left/right
 document.addEventListener('keypress', (event) => {
@@ -490,17 +562,39 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     console.log("avatarHeight", height);
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.13, -0.45);
+        obj.rotation.set(-0.2, 0, 0);
+        obj.scale.set(1.3, 1.2, 1.2);
     }
     else if (avatar_style == 'rpm') {
         obj.position.set(0, (-0.1 - height), -0.25);
     }
-    else { //mh
+    else if (avatar_style == 'mh') {
         obj.position.set(0, (-0.1 - height), 0);
     }
     self_loading = false;
 });
 
 function init() {
+
+    console.error("init", avatar_style)
+    if (avatar_style == 'nico') {
+        self_loading = true;
+        let v = './assets/NicoARKit.glb';
+        //document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        //   document.getElementById("self-view").setAttribute('gltf-model', v);
+    }
+    else if (avatar_style == 'mh') {
+        self_loading = true;
+        let v = './assets/VivianARKit.glb';
+        //document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        document.getElementById("self-view").setAttribute('gltf-model', v);
+
+    }
+    else if (avatar_style == 'rpm') {
+        frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
+        document.getElementById('frame').hidden = false;
+    }
+
     if (!mediapipe || mediapipe === "true") {
         const constraints = {
             video: { width: 320, height: 180, rameRate: 15 },
@@ -513,11 +607,14 @@ function init() {
     document.querySelector('a-scene').emit('connect');
 }
 
-document.querySelector('a-scene').addEventListener('loaded', function () {
-    init()
-})
+
 
 if (document.querySelector('a-scene').emit) {
     init();
+}
+else {
+    document.querySelector('a-scene').addEventListener('loaded', function () {
+        init()
+    })
 }
 
