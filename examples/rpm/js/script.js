@@ -575,6 +575,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
     self_loading = false;
     // hide loader 
+    Window.sendBlendshapes();
 });
 
 function init() {
