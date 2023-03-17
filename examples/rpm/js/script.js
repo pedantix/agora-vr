@@ -561,7 +561,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     let height = avatarHeight(obj);
     console.log("avatarHeight", height);
     if (avatar_style == 'nico') {
-        obj.position.set(0, -0.99, -0.55);
+        obj.position.set(0, -1.1, -0.7);
         //obj.position.set(0, -1.13, -0.45);
         obj.rotation.set(0, 0, 0);
         //obj.rotation.set(-0.2, 0, 0);
