@@ -201,13 +201,11 @@ function swivelHead(obj, roll, yaw, pitch) {
                 neck.rotation.x = 0.4 * 3 * roll;
                 neck.rotation.z = -0.1 + 0.4 * -3 * pitch;
                 neck.rotation.y = 0.4 * (3 * yaw);
-
-
             }
         }
     }
-
 }
+
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
     canvasCtx.save();
@@ -462,8 +460,8 @@ function handleMocap(csv) {
         neck.rotation.x = - 0.4 * roll;
         head.rotation.y = -0.6 * yaw;
         neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.2+ 0.6 * pitch;
-        neck.rotation.z = -0.2+ 0.4 * pitch;     
+        head.rotation.z = -0.1+ 0.6 * pitch;
+        neck.rotation.z = -0.1+ 0.4 * pitch;     
     }    
 
 }
@@ -502,7 +500,6 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     self_loading = false;
 });
 
-
 function init() {
     if (!mediapipe || mediapipe === "true") {
         const constraints = {
@@ -519,6 +516,7 @@ function init() {
 document.querySelector('a-scene').addEventListener('loaded', function () {
     init()
 })
+
 if (document.querySelector('a-scene').emit) {
     init();
 }
