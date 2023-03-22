@@ -214,7 +214,7 @@ for (let i=0; i<rpm_blendshapes.length;i++){
 
 // iOS ArKit52
 function remoteMocap(bs_csv) {
-    window.AgoraRtcAdapter.mocapData=bs_csv;
+
     let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
 
