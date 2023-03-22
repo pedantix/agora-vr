@@ -113,14 +113,11 @@ const CENTER_BROW_DOWN = 168;
 const RIGHT_BROW_UP = 334;
 //const RIGHT_BROW_DOWN = 443;  
 const RIGHT_BROW_DOWN = 449;
-
 const CENTER_BELOW_NOSE = 164;
-
 const RIGHT_EYE_UP = 386;
 const RIGHT_EYE_DOWN = 374;
 const RIGHT_EYE_LEFT = 362;
 const RIGHT_EYE_RIGHT = 359;
-
 const LEFT_EYE_UP = 159;
 const LEFT_EYE_DOWN = 145;
 const LEFT_EYE_LEFT = 130;
@@ -137,9 +134,8 @@ function ldistance(x, y) {
 
 
 function swivelHead(obj, roll, yaw, pitch) {
-
     if (avatar_style == 'rpm') {
-        let head_rotation_x = 0.4 + 0.6 * -2 * pitch;
+        let head_rotation_x = 0.1 + 0.6 * -2 * pitch;
         let head_rotation_y = 0.6 * 3 * yaw;
         let head_rotation_z = 0.6 * -3 * roll;
 
@@ -162,7 +158,7 @@ function swivelHead(obj, roll, yaw, pitch) {
         }
     } else if (avatar_style == 'mh') {
         let head_rotation_x = 0.6 * -3 * roll;
-        let head_rotation_z = -0.25 + 0.6 * 3 * pitch;
+        let head_rotation_z = -0.15 + 0.6 * 3 * pitch;
         let head_rotation_y = 0.6 * (3 * yaw);
         let head = getBone(obj, 'head');
         let head_rotation_delta_z = Math.abs(head.rotation.z - head_rotation_z);
@@ -205,6 +201,97 @@ function swivelHead(obj, roll, yaw, pitch) {
     }
 }
 
+let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
+let BS_YAW=52;
+let BS_PITCH=53;
+let BS_ROLL=54;
+let BS_TOTAL_COUNT=55;
+//map string to pos
+let rpm_blendshape_location_map={};
+for (let i=0; i<rpm_blendshapes.length;i++){
+    rpm_blendshape_location_map[rpm_blendshapes[i]]=i;
+}
+
+// iOS ArKit52
+function remoteMocap(bs_csv) {
+    window.AgoraRtcAdapter.mocapData=bs_csv;
+    let blendshapes_values = bs_csv.split(',');
+    let remoteClient=blendshapes_values[blendshapes_values.length-1];
+
+    //console.log("remoteMocap",);
+    let nn=document.querySelectorAll('[networked-audio-source]');
+    for (let n=0; n<nn.length; n++) {
+        if (nn[n].components['networked'].data.owner==remoteClient) {
+            console.log("match ",remoteClient);
+            let obj=nn[n].components['networked'].el.object3D;
+            try {
+              applyMocap(obj,blendshapes_values);    
+            } catch (e) {
+              //  console.log(e);
+            }
+            break;
+        }
+    }
+
+    
+}
+
+// iOS ArKit52
+function handleMocap(bs_csv) {
+    //console.log(Date.now());
+    window.AgoraRtcAdapter.mocapData=bs_csv;
+    let blendshapes_values = bs_csv.split(',');
+    let obj = document.getElementById("self-view").object3D;
+    applyMocap(obj, blendshapes_values);
+}
+
+function applyMocap(obj, blendshapes_values){
+    if (!obj || self_loading) {
+        return;
+    }
+
+    blendshapes_values[rpm_blendshape_location_map['tongueOut']]=blendshapes_values[rpm_blendshape_location_map['tongueOut']]*0.8; // tongue
+    for (let i = 0; i < rpm_blendshapes.length; i++) {
+        playMorphTarget(obj, rpm_blendshapes[i], blendshapes_values[i]);
+    }
+
+    let head = getBone(obj, 'head');
+    let neck = getBone(obj, 'neck');
+
+    let pitch = blendshapes_values[BS_PITCH];
+    let yaw = blendshapes_values[BS_YAW];
+    let roll = blendshapes_values[BS_ROLL];
+
+    if (avatar_style == 'rpm') {
+        head.rotation.x = 0.6 * pitch;
+        neck.rotation.x = 0.4 * pitch;
+        head.rotation.y = -0.6 * yaw;
+        neck.rotation.y = -0.4 * yaw;
+        head.rotation.z = -0.6 * roll;
+        neck.rotation.z = -0.4 * roll;
+    } else if (avatar_style == 'mh') {
+        head.rotation.x = 0.6 * roll;
+        neck.rotation.x = 0.4 * roll;
+        head.rotation.y = -0.6 * yaw;
+        neck.rotation.y = -0.4 * yaw;
+        head.rotation.z = -0.6 * pitch;
+        neck.rotation.z = -0.4 * pitch;
+    } else if (avatar_style == 'nico') {
+        head.rotation.x = -0.6 * roll;
+        neck.rotation.x = - 0.4 * roll;
+        head.rotation.y = 0.6 * yaw;
+        neck.rotation.y = 0.4 * yaw;
+        head.rotation.z = -0.1 + 0.6 * pitch;
+        neck.rotation.z = -0.1 + 0.4 * pitch;
+    }
+
+}
+
+/*
+Arkit 
+Mediapipe
+*/
+
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
     canvasCtx.save();
@@ -225,7 +312,6 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_LIP]);
             newArray.push(landmarks[TOP_LIP]);
             newArray.push(landmarks[BOTTOM_LIP]);
-
             newArray.push(landmarks[LEFT_BROW_UP]);
             newArray.push(landmarks[LEFT_BROW_DOWN]);
             newArray.push(landmarks[CENTER_BROW_UP]);
@@ -239,11 +325,31 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_EYE_UP]);
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
 
-            swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
+            //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
+            
+            let blendshapes=[];
+            for (var i = 1; i <= BS_TOTAL_COUNT; i++) {
+                blendshapes.push(0);
+            }
 
-            playMorphTarget(obj, 'jawOpen', 4 * (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y));
-            playMorphTarget(obj, 'mouthSmileLeft', 7 * (landmarks[BOTTOM_LIP].y - landmarks[LEFT_LIP].y));
-            playMorphTarget(obj, 'mouthSmileRight', 7 * (landmarks[BOTTOM_LIP].y - landmarks[RIGHT_LIP].y));
+            // keep same if too small change
+            blendshapes[BS_PITCH]=-2*(landmarks[TOP].z - landmarks[BOTTOM].z);
+            blendshapes[BS_YAW]=3*(landmarks[LEFT].z - landmarks[RIGHT].z);
+            blendshapes[BS_ROLL]=-3*(landmarks[LEFT].y - landmarks[RIGHT].y);
+
+            let jaw_open= 4 * (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);
+            blendshapes[rpm_blendshape_location_map['jawOpen']]=jaw_open;
+            
+            if (avatar_style=='nico') {
+                if (jaw_open > 0.4) {
+                    blendshapes[rpm_blendshape_location_map['tongueOut']]=1;
+                }
+                else {
+                    blendshapes[rpm_blendshape_location_map['tongueOut']]=0;
+                }
+            }
+            blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]= 7 * (landmarks[BOTTOM_LIP].y - landmarks[LEFT_LIP].y);
+            blendshapes[rpm_blendshape_location_map['mouthSmileRight']]= 7 * (landmarks[BOTTOM_LIP].y - landmarks[RIGHT_LIP].y);
 
             //console.log(landmarks[BOTTOM_LIP].y-landmarks[LEFT_LIP].y);
             let top = ldistance(landmarks[TOP], landmarks[CENTER_BELOW_NOSE]);
@@ -255,16 +361,25 @@ function onResultsFaceMesh(results) {
             let left_eye_h = ldistance(landmarks[LEFT_EYE_LEFT], landmarks[LEFT_EYE_RIGHT]);
             let right_eye = ldistance(landmarks[RIGHT_EYE_UP], landmarks[RIGHT_EYE_DOWN]);
             let right_eye_h = ldistance(landmarks[RIGHT_EYE_LEFT], landmarks[RIGHT_EYE_RIGHT]);
-
+           // console.log(right_eye/right_eye_h,left_eye/left_eye_h);
+            let left_eye_ratio=left_eye/left_eye_h;
+            let right_eye_ratio=right_eye/right_eye_h;
+            blendshapes[rpm_blendshape_location_map['eyeBlinkLeft']]= (0.42-left_eye_ratio)*20;
+            blendshapes[rpm_blendshape_location_map['eyeSquintLeft']]= (0.42-left_eye_ratio)*20;
+            blendshapes[rpm_blendshape_location_map['eyeWideLeft']]= (left_eye_ratio-0.42)*7;
+            blendshapes[rpm_blendshape_location_map['eyeBlinkRight']]= (0.42-right_eye_ratio)*20;
+            blendshapes[rpm_blendshape_location_map['eyeSquintRight']]= (0.42-right_eye_ratio)*20;
+            blendshapes[rpm_blendshape_location_map['eyeWideRight']]= (right_eye_ratio-0.42)*7;
+            
             let facesize = TOP - CENTER_BELOW_NOSE;
             let left_up = (20 * (left - (0.14 * top / 0.46)))
             let right_up = (20 * (right - (0.14 * top / 0.46)))
             let center_up = (20 * (center - (0.14 * top / 0.46)))
             // console.log(3000*positiveOrZero((landmarks[LEFT_BROW_UP].y-landmarks[LEFT].y)/facesize-0.001),((landmarks[LEFT_BROW_UP].y-landmarks[LEFT].y)/facesize),(landmarks[RIGHT_BROW_UP].y-landmarks[RIGHT].y)/facesize);
-            playMorphTarget(obj, 'browInnerUp', left_up);
-            playMorphTarget(obj, 'browOuterUpLeft', left_up);
-            playMorphTarget(obj, 'browOuterUpRight', right_up);
-
+            blendshapes[rpm_blendshape_location_map['browInnerUp']]=left_up;
+            blendshapes[rpm_blendshape_location_map['browOuterUpLeft']]=left_up;
+            blendshapes[rpm_blendshape_location_map['browOuterUpRight']]=right_up;        
+            handleMocap(blendshapes.join());
             drawLandmarks(canvasCtx, newArray, { color: '#FF10F0', lineWidth: 2, radius: 2 });
 
         }
@@ -411,51 +526,20 @@ function avatarHeight(obj) {
     return box.max.y - box.min.y;
 }
 
-let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
 
-// iOS ArKit52
-function handleMocap(csv) {
-
+function testBS() {
     let obj = document.getElementById("self-view").object3D;
-    if (!obj || self_loading) {
-        return;
-    }
-
-    console.log(Date.now());
-    let blendshapes_values = csv.split(',');
+    playMorphTarget(obj, rpm_blendshapes[51], 0);
     for (let i = 0; i < rpm_blendshapes.length; i++) {
-        playMorphTarget(obj, rpm_blendshapes[i], blendshapes_values[i]);
+        let s=i;
+        setTimeout(()=> {
+            if (s>0)
+            playMorphTarget(obj, rpm_blendshapes[s-1], 0);
+
+        playMorphTarget(obj, rpm_blendshapes[s], 1);
+        console.log("setting "+rpm_blendshapes[s]);
+        },1000*i);
     }
-
-    let head = getBone(obj, 'head');
-    let neck = getBone(obj, 'neck');
-    let pitch = blendshapes_values[53];
-    let yaw = blendshapes_values[52];
-    let roll = blendshapes_values[54];
-
-    if (avatar_style == 'rpm') {
-        head.rotation.x = 0.6 * pitch;
-        neck.rotation.x = 0.4 * pitch;
-        head.rotation.y = -0.6 * yaw;
-        neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.6 * roll;
-        neck.rotation.z = -0.4 * roll;
-    } else if (avatar_style == 'mh') {
-        head.rotation.x = 0.6 * roll;
-        neck.rotation.x = 0.4 * roll;
-        head.rotation.y = -0.6 * yaw;
-        neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.6 * pitch;
-        neck.rotation.z = -0.4 * pitch;
-    } else if (avatar_style == 'nico') {
-        head.rotation.x = -0.6 * roll;
-        neck.rotation.x = - 0.4 * roll;
-        head.rotation.y = 0.6 * yaw;
-        neck.rotation.y = 0.4 * yaw;
-        head.rotation.z = -0.1 + 0.6 * pitch;
-        neck.rotation.z = -0.1 + 0.4 * pitch;
-    }
-
 }
 
 // animate loader
@@ -553,6 +637,7 @@ document.addEventListener('keypress', (event) => {
 
 // MediaPipe
 window.handleMocap = handleMocap;
+window.remoteMocap = remoteMocap;
 
 document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
     if (e.target.id!="self-view")
@@ -569,13 +654,19 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
     else if (avatar_style == 'rpm') {
         obj.position.set(0, (-0.1 - height), -0.25);
+        // keep for face work
+        // obj.position.set(0, (0.35 - height),-0.4);
+        // obj.rotation.set(0, 0, 0);
     }
     else if (avatar_style == 'mh') {
         obj.position.set(0, (-0.1 - height), 0);
+        obj.rotation.set(-0.436, 0, 0);
+        //obj.rotation.set(-0.2, 0, 0);
     }
     self_loading = false;
     // hide loader 
-    Window.sendBlendshapes();
+    if ( Window.sendBlendshapes)
+        Window.sendBlendshapes();
 });
 
 function init() {
@@ -600,6 +691,7 @@ function init() {
     }
 
     if (!mediapipe || mediapipe === "true") {
+        console.error("getUserMedia");
         const constraints = {
             video: { width: 320, height: 180, rameRate: 15 },
             audio: true
@@ -608,17 +700,33 @@ function init() {
             camera.start();
         });
     }
-    document.querySelector('a-scene').emit('connect');
+  //  document.querySelector('a-scene').emit('connect');
 }
 
+document.querySelector('a-scene').addEventListener('loaded', function () {
+    init()
+})
+
+document.body.addEventListener('clientConnected', function (evt) {
+    console.error('clientConnected event. clientId =', evt.detail.clientId, evt );
+  });
 
 
+  document.body.addEventListener('entityCreated', function (evt) {
+    console.error('entityCreated event', evt.detail.el, evt);
+  });
+
+
+  document.body.addEventListener('connected', function (evt) {
+    console.error('connected event. clientId =', evt.detail.clientId, evt);
+  });
+/*
 if (document.querySelector('a-scene').emit) {
     init();
 }
-else {
+//else {
     document.querySelector('a-scene').addEventListener('loaded', function () {
         init()
     })
-}
-
+//}
+*/

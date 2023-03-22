@@ -64,6 +64,8 @@
           this.nametagInput = document.getElementById('username-overlay');
           this.nametagInput.value = this.data.name;
         }
+
+        console.log("BW73 PI INIT ",this.el.id,this.ownedByLocalUser,this)
       },
 
       // here as an example, not used in current demo. Could build a user list, expanding on this.
@@ -73,10 +75,23 @@
           [...document.querySelectorAll('[player-info]')].map((el) => el.components['player-info'].data.name)
         );
       },
-
+      tick: function tick(t, dt) {
+        if (this.el.id!="player"){
+         // this.el.object3D.rotation.x=0;
+          //this.el.object3D.rotation.x=0;
+          //this.el.object3D.rotation.z=0;
+         // console.log(this.el.id,this.el.object3D.rotation)
+        }
+     
+    // if (this.data.enabled && this.data.elSource) {
+    //    this.el.setAttribute('rotation', document.getElementById(this.data.elSource).getAttribute('rotation'));
+   //   }
+    },
       update: function () {
+        console.log("BW73 PI UPDATE ",this.el.id,this)
         if (this.head) this.head.setAttribute('gltf-model', this.data.gltfmodel);
         if (this.nametag) this.nametag.setAttribute('value', this.data.name);
+
       }
     });
   </script>
@@ -134,7 +149,7 @@
   <a-scene networked-scene="
       app: 20b7c51ff4c644ab80cf5a4e646b0537;
       room: {'name':'test1', 'vbg0':false, 'showLocal': false};
-      connectOnLoad: false;
+      connectOnLoad: true;
       debug: false;
       adapter: agorartc;
       audio: true;
