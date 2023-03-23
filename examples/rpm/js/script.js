@@ -232,9 +232,7 @@ function remoteMocap(bs_csv) {
             }
             break;
         }
-    }
-
-    
+    }    
 }
 
 // iOS ArKit52
@@ -710,8 +708,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     self_loading = false;
     // hide loader 
     if ( Window.sendBlendshapes) {
-        //Window.sendBlendshapes();
-        alert(8);
+        Window.sendBlendshapes();        
     }
 });
 
@@ -754,7 +751,7 @@ document.querySelector('a-scene').addEventListener('loaded', function () {
 })
 
 document.querySelector('a-scene').addEventListener('deviceorientationpermissiongranted', function () {
-    alert("googoo");
+
 })
 
 
