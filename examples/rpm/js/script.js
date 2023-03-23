@@ -132,7 +132,7 @@ function ldistance(x, y) {
 }
 
 
-
+/*
 function swivelHead(obj, roll, yaw, pitch) {
     if (avatar_style == 'rpm') {
         let head_rotation_x = 0.1 + 0.6 * -2 * pitch;
@@ -200,6 +200,7 @@ function swivelHead(obj, roll, yaw, pitch) {
         }
     }
 }
+*/
 
 let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
 let BS_YAW=52;
@@ -222,7 +223,7 @@ function remoteMocap(bs_csv) {
     let nn=document.querySelectorAll('[networked-audio-source]');
     for (let n=0; n<nn.length; n++) {
         if (nn[n].components['networked'].data.owner==remoteClient) {
-            console.log("match ",remoteClient);
+            //console.log("match ",remoteClient);
             let obj=nn[n].components['networked'].el.object3D;
             try {
               applyMocap(obj,blendshapes_values);    
@@ -305,16 +306,19 @@ function onResultsFaceMesh(results) {
         for (const landmarks of results.multiFaceLandmarks) {
 
             var newArray = [];
+            /*
             newArray.push(landmarks[NOSE]);
             newArray.push(landmarks[NASAL]);
             newArray.push(landmarks[LEFT]);
             newArray.push(landmarks[RIGHT]);
             newArray.push(landmarks[TOP]);
             newArray.push(landmarks[BOTTOM]);
+*/
             newArray.push(landmarks[LEFT_LIP]);
             newArray.push(landmarks[RIGHT_LIP]);
             newArray.push(landmarks[TOP_LIP]);
             newArray.push(landmarks[BOTTOM_LIP]);
+  /*
             newArray.push(landmarks[LEFT_BROW_UP]);
             newArray.push(landmarks[LEFT_BROW_DOWN]);
             newArray.push(landmarks[CENTER_BROW_UP]);
@@ -327,7 +331,7 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[LEFT_EYE_DOWN]);
             newArray.push(landmarks[RIGHT_EYE_UP]);
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
-
+*/
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
             
             let blendshapes=[];
@@ -343,18 +347,25 @@ function onResultsFaceMesh(results) {
             let delta_yaw=yaw-last_yaw;
             let delta_roll=roll-last_roll;
 
-            let delta_head=Math.sqrt(delta_pitch * delta_pitch + delta_yaw * delta_yaw + delta_roll * delta_roll)
-            console.log("delta",delta_head);
+            let delta_head=Math.sqrt(delta_pitch * delta_pitch + delta_yaw * delta_yaw + delta_roll * delta_roll);
+
+       //     console.log("delta",delta_head);
+            if (delta_head<0.01) {
+                pitch=last_pitch;
+                yaw=last_yaw;
+                roll=last_roll;
+            } else {
+                last_pitch=pitch;
+                last_yaw=yaw;
+                last_roll=roll;
+            }
   
-            last_pitch=pitch;
-            last_yaw=yaw;
-            last_roll=roll;
             // keep same if too small change
             blendshapes[BS_PITCH]=-2*(pitch);
             blendshapes[BS_YAW]=3*(yaw);
             blendshapes[BS_ROLL]=-3*(roll);
 
-            let jaw_open= 4 * (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);
+            let jaw_open= 8 * ldistance(landmarks[BOTTOM_LIP], landmarks[TOP_LIP]); // (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);
             blendshapes[rpm_blendshape_location_map['jawOpen']]=jaw_open;
             
             if (avatar_style=='nico') {
@@ -365,8 +376,8 @@ function onResultsFaceMesh(results) {
                     blendshapes[rpm_blendshape_location_map['tongueOut']]=0;
                 }
             }
-            blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]= 7 * (landmarks[BOTTOM_LIP].y - landmarks[LEFT_LIP].y);
-            blendshapes[rpm_blendshape_location_map['mouthSmileRight']]= 7 * (landmarks[BOTTOM_LIP].y - landmarks[RIGHT_LIP].y);
+            blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]= 10 * ldistance(landmarks[BOTTOM_LIP], landmarks[LEFT_LIP]);
+            blendshapes[rpm_blendshape_location_map['mouthSmileRight']]= 10 * ldistance(landmarks[BOTTOM_LIP],landmarks[RIGHT_LIP]);
 
             //console.log(landmarks[BOTTOM_LIP].y-landmarks[LEFT_LIP].y);
             let top = ldistance(landmarks[TOP], landmarks[CENTER_BELOW_NOSE]);
@@ -381,9 +392,12 @@ function onResultsFaceMesh(results) {
            // console.log(right_eye/right_eye_h,left_eye/left_eye_h);
             let left_eye_ratio=left_eye/left_eye_h;
             let right_eye_ratio=right_eye/right_eye_h;
+
+            console.log(left_eye_ratio,right_eye_ratio);
             blendshapes[rpm_blendshape_location_map['eyeBlinkLeft']]= (0.42-left_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeSquintLeft']]= (0.42-left_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeWideLeft']]= (left_eye_ratio-0.42)*7;
+
             blendshapes[rpm_blendshape_location_map['eyeBlinkRight']]= (0.42-right_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeSquintRight']]= (0.42-right_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeWideRight']]= (right_eye_ratio-0.42)*7;
@@ -396,16 +410,29 @@ function onResultsFaceMesh(results) {
             blendshapes[rpm_blendshape_location_map['browInnerUp']]=left_up;
             blendshapes[rpm_blendshape_location_map['browOuterUpLeft']]=left_up;
             blendshapes[rpm_blendshape_location_map['browOuterUpRight']]=right_up;        
+        
+        
             handleMocap(blendshapes.join());
             drawLandmarks(canvasCtx, newArray, { color: '#FF10F0', lineWidth: 2, radius: 2 });
-
+            drawConnectors(canvasCtx, landmarks, FACEMESH_FACE_OVAL, {color:  '#FF6700', lineWidth: 1});
+          
+            /*
+            drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: '#C0C0C070', lineWidth: 1});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYE, {color: '#FF3030'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYEBROW, {color: '#FF3030'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_IRIS, {color: '#FF3030'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYE, {color: '#30FF30'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYEBROW, {color: '#30FF30'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_IRIS, {color: '#30FF30'});
+          drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, {color: '#E0E0E0'});
+*/
         }
     }
     canvasCtx.restore();
 }
 
 function blendshapeLimit(val) {
-    if (val > 1) return 1;
+    if (val > 0.9) return 0.9;
     if (val < 0) return 0;
     return val;
 }
