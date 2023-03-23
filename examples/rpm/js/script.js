@@ -291,6 +291,9 @@ function applyMocap(obj, blendshapes_values){
 Arkit 
 Mediapipe
 */
+let last_pitch=0;
+let last_roll=0;
+let last_yaw=0;
 
 function onResultsFaceMesh(results) {
     document.body.classList.add('loaded');
@@ -332,10 +335,24 @@ function onResultsFaceMesh(results) {
                 blendshapes.push(0);
             }
 
+            let pitch=landmarks[TOP].z - landmarks[BOTTOM].z;
+            let yaw=landmarks[LEFT].z - landmarks[RIGHT].z;
+            let roll=landmarks[LEFT].y - landmarks[RIGHT].y;
+
+            let delta_pitch=pitch-last_pitch;
+            let delta_yaw=yaw-last_yaw;
+            let delta_roll=roll-last_roll;
+
+            let delta_head=Math.sqrt(delta_pitch * delta_pitch + delta_yaw * delta_yaw + delta_roll * delta_roll)
+            console.log("delta",delta_head);
+  
+            last_pitch=pitch;
+            last_yaw=yaw;
+            last_roll=roll;
             // keep same if too small change
-            blendshapes[BS_PITCH]=-2*(landmarks[TOP].z - landmarks[BOTTOM].z);
-            blendshapes[BS_YAW]=3*(landmarks[LEFT].z - landmarks[RIGHT].z);
-            blendshapes[BS_ROLL]=-3*(landmarks[LEFT].y - landmarks[RIGHT].y);
+            blendshapes[BS_PITCH]=-2*(pitch);
+            blendshapes[BS_YAW]=3*(yaw);
+            blendshapes[BS_ROLL]=-3*(roll);
 
             let jaw_open= 4 * (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);
             blendshapes[rpm_blendshape_location_map['jawOpen']]=jaw_open;
