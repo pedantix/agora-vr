@@ -1,6 +1,6 @@
 onrtctransform = (event) => {
     const transformer = event.transformer;
-  
+    console.log("AGORAMOCAP");
     // custom data append params
     var CustomDataDetector = 'AGORAMOCAP';
     var CustomDatLengthByteCount = 4;
@@ -8,6 +8,7 @@ onrtctransform = (event) => {
     let lastWatermark = "";
   
     transformer.options.port.onmessage = (event) => {
+        console.warn("onmessage",event.data.watermark);
       watermarkText = event.data.watermark;
     }
   
@@ -29,14 +30,16 @@ onrtctransform = (event) => {
     }
   
     function outgoing(transformer) {
+        console.log("outgoing");
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
   
-        if (chunk.value instanceof RTCEncodedVideoFrame) {
+        if (chunk.value instanceof RTCEncodedAudioFrame) {
           const watermark = textEncoder.encode(watermarkText);
+          //console.warn("encoding",watermarkText);
           const frame = chunk.value.data;
-          const data = new Uint8Array(chunk.value.data.byteLength + watermark.byteLength + 1 + CustomDataDetector.length);
+          const data = new Uint8Array(chunk.value.data.byteLength + watermark.byteLength + CustomDatLengthByteCount + CustomDataDetector.length);
           data.set(new Uint8Array(frame), 0);
           data.set(watermark, frame.byteLength);
           var bytes = getIntBytes(watermark.byteLength);
@@ -58,11 +61,12 @@ onrtctransform = (event) => {
     }
   
     function incoming(transformer) {
+        console.log("incoming");
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
   
-        if (chunk.value instanceof RTCEncodedVideoFrame) {
+        if (chunk.value instanceof RTCEncodedAudioFrame) {
           const view = new DataView(chunk.value.data);
   
           // Get magic data
@@ -81,6 +85,7 @@ onrtctransform = (event) => {
   
             if (lastWatermark !== watermark) {
               lastWatermark = watermark;
+              //console.warn("decoded",watermark);
               transformer.options.port.postMessage(watermark);
             }
   

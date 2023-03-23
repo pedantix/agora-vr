@@ -238,7 +238,7 @@ function remoteMocap(bs_csv) {
 // iOS ArKit52
 function handleMocap(bs_csv) {
     //console.log(Date.now());
-    window.AgoraRtcAdapter.mocapData=bs_csv;
+    window.AgoraRtcAdapter.sendMocap(bs_csv);
     let blendshapes_values = bs_csv.split(',');
     let obj = document.getElementById("self-view").object3D;
     applyMocap(obj, blendshapes_values);
