@@ -393,7 +393,7 @@ function onResultsFaceMesh(results) {
             let left_eye_ratio=left_eye/left_eye_h;
             let right_eye_ratio=right_eye/right_eye_h;
 
-            console.log(left_eye_ratio,right_eye_ratio);
+            //console.log(left_eye_ratio,right_eye_ratio);
             blendshapes[rpm_blendshape_location_map['eyeBlinkLeft']]= (0.42-left_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeSquintLeft']]= (0.42-left_eye_ratio)*20;
             blendshapes[rpm_blendshape_location_map['eyeWideLeft']]= (left_eye_ratio-0.42)*7;
@@ -709,8 +709,10 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
     self_loading = false;
     // hide loader 
-    if ( Window.sendBlendshapes)
-        Window.sendBlendshapes();
+    if ( Window.sendBlendshapes) {
+        //Window.sendBlendshapes();
+        alert(8);
+    }
 });
 
 function init() {
@@ -750,6 +752,13 @@ function init() {
 document.querySelector('a-scene').addEventListener('loaded', function () {
     init()
 })
+
+document.querySelector('a-scene').addEventListener('deviceorientationpermissiongranted', function () {
+    alert("googoo");
+})
+
+
+
 
 document.body.addEventListener('clientConnected', function (evt) {
     console.error('clientConnected event. clientId =', evt.detail.clientId, evt );
