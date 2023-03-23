@@ -751,7 +751,7 @@ document.querySelector('a-scene').addEventListener('loaded', function () {
 })
 
 document.querySelector('a-scene').addEventListener('deviceorientationpermissiongranted', function () {
-
+    console.log("deviceorientationpermissiongranted");
 })
 
 
