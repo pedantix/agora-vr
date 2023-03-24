@@ -8,9 +8,10 @@ onrtctransform = (event) => {
     let lastWatermark = "";
     let logi=0;
     let logo=0;
+    let logi2=0;
+    let logo2=0;
 
     transformer.options.port.onmessage = (event) => {
-     //   console.warn("onmessage",event.data.watermark);
       watermarkText = event.data.watermark;
     }
   
@@ -32,7 +33,10 @@ onrtctransform = (event) => {
     }
   
     function outgoing(transformer) {
-        console.warn("outgoing");
+        if (logo2++>50) {
+            console.warn("outgoing");
+            logo2=0;
+          }
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
@@ -67,7 +71,11 @@ onrtctransform = (event) => {
     }
   
     function incoming(transformer) {    
-        console.warn("outgoing");    
+        if (logi2++>50) {
+            console.warn("incoming");
+            logi2=0;
+          }
+        
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
@@ -95,7 +103,7 @@ onrtctransform = (event) => {
               transformer.options.port.postMessage(watermark);
               if (logi++>50) {
                 console.warn("decoding",watermark);
-                logo=0;
+                logi=0;
               }
     
             }
