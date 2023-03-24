@@ -6,9 +6,11 @@ onrtctransform = (event) => {
     var CustomDatLengthByteCount = 4;
     let watermarkText = "";
     let lastWatermark = "";
-  
+    let logi=0;
+    let logo=0;
+
     transformer.options.port.onmessage = (event) => {
-        console.warn("onmessage",event.data.watermark);
+     //   console.warn("onmessage",event.data.watermark);
       watermarkText = event.data.watermark;
     }
   
@@ -30,14 +32,13 @@ onrtctransform = (event) => {
     }
   
     function outgoing(transformer) {
-        console.log("outgoing");
+        console.warn("outgoing");
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
   
         if (chunk.value instanceof RTCEncodedAudioFrame) {
           const watermark = textEncoder.encode(watermarkText);
-          //console.warn("encoding",watermarkText);
           const frame = chunk.value.data;
           const data = new Uint8Array(chunk.value.data.byteLength + watermark.byteLength + CustomDatLengthByteCount + CustomDataDetector.length);
           data.set(new Uint8Array(frame), 0);
@@ -52,6 +53,11 @@ onrtctransform = (event) => {
           for (let i = 0; i < CustomDataDetector.length; i++) {
             data[magicIndex + i] = CustomDataDetector.charCodeAt(i);
           }
+          if (logo++>50) {
+            console.warn("encoding",watermarkText);
+            logo=0;
+          }
+
           chunk.value.data = data.buffer;
         }
   
@@ -60,8 +66,8 @@ onrtctransform = (event) => {
       });
     }
   
-    function incoming(transformer) {
-        console.log("incoming");
+    function incoming(transformer) {    
+        console.warn("outgoing");    
       transformer.reader.read().then(chunk => {
         if (chunk.done)
           return;
@@ -87,6 +93,11 @@ onrtctransform = (event) => {
               lastWatermark = watermark;
               //console.warn("decoded",watermark);
               transformer.options.port.postMessage(watermark);
+              if (logi++>50) {
+                console.warn("decoding",watermark);
+                logo=0;
+              }
+    
             }
   
             // Get frame data
@@ -97,7 +108,7 @@ onrtctransform = (event) => {
         }
         transformer.writer.write(chunk.value);
         incoming(transformer);
-      });
+      });   
     }
   
     if (transformer.options.name === 'outgoing') {

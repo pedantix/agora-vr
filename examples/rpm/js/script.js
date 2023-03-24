@@ -249,7 +249,7 @@ function applyMocap(obj, blendshapes_values){
         return;
     }
 
-    blendshapes_values[rpm_blendshape_location_map['tongueOut']]=blendshapes_values[rpm_blendshape_location_map['tongueOut']]*0.8; // tongue
+    //blendshapes_values[rpm_blendshape_location_map['tongueOut']]=blendshapes_values[rpm_blendshape_location_map['tongueOut']]*0.8; // tongue
     for (let i = 0; i < rpm_blendshapes.length; i++) {
         playMorphTarget(obj, rpm_blendshapes[i], blendshapes_values[i]);
     }
