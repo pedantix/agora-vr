@@ -1,11 +1,12 @@
 onrtctransform = (event) => {
     const transformer = event.transformer;
-    console.log("AGORAMOCAP");
+    console.warn("AGORAMOCAP");
     // custom data append params
     var CustomDataDetector = 'AGORAMOCAP';
     var CustomDatLengthByteCount = 4;
     let watermarkText = "";
     let lastWatermark = "";
+    let rr=Math.random();
     let logi=0;
     let logo=0;
     let logi2=0;
@@ -34,7 +35,7 @@ onrtctransform = (event) => {
   
     function outgoing(transformer) {
         if (logo2++>50) {
-            console.warn("outgoing");
+            console.warn("outgoing transformer",rr);
             logo2=0;
           }
       transformer.reader.read().then(chunk => {
@@ -72,7 +73,7 @@ onrtctransform = (event) => {
   
     function incoming(transformer) {    
         if (logi2++>50) {
-            console.warn("incoming");
+            console.warn("incoming transformer",rr);
             logi2=0;
           }
         
