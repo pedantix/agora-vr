@@ -119,7 +119,7 @@
               if (Date.now()-_state_stop_at>6000) {
                 _state_stop_at=Date.now(); // reset
               }
-              else if (Date.now()-_state_stop_at>8000) {
+              else if (Date.now()-_state_stop_at>5000) {
                 local_body_anim=ANIM_DANCE;
               } else {
                 local_body_anim=ANIM_IDLE;
@@ -132,7 +132,7 @@
     // if (this.data.enabled && this.data.elSource) {
     //    this.el.setAttribute('rotation', document.getElementById(this.data.elSource).getAttribute('rotation'));
    //   }
-    },
+    },   
       update: function () {
         console.log("BW73 PI UPDATE ",this.el.id,this)
         if (this.head) this.head.setAttribute('gltf-model', this.data.gltfmodel);

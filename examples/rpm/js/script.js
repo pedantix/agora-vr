@@ -242,7 +242,7 @@ function remoteMocap(bs_csv) {
               }
 
               try {
-                console.log("remoteMocap",blendshapes_values[BODY_ANIM],blendshapes_values);
+               // console.log("remoteMocap",blendshapes_values[BODY_ANIM],blendshapes_values);
                 applyAnim(obj,blendshapes_values[BODY_ANIM]);    
               } catch (e) {
                 //  console.log(e);
@@ -870,8 +870,8 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
 
 function rand(min,max){
  let b=min+Math.random()*max;
- let r=Math.round(Math.random()) ? 1 : -1;
- console.warn("r",r);
+ let r=(new Date()).getMilliseconds()%2 ? 1 : -1;
+ console.warn("r",r,b);
  b *=r; 
  
  return b;
