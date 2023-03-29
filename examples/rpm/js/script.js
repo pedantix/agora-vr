@@ -206,20 +206,24 @@ let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOute
 let BS_YAW=52;
 let BS_PITCH=53;
 let BS_ROLL=54;
-let BS_TOTAL_COUNT=55;
+
+let BS_TOTAL_COUNT=56;
+let BODY_ANIM=56; // extra
+
 //map string to pos
 let rpm_blendshape_location_map={};
 for (let i=0; i<rpm_blendshapes.length;i++){
     rpm_blendshape_location_map[rpm_blendshapes[i]]=i;
 }
 
+let win_anim=0;
 // iOS ArKit52
 function remoteMocap(bs_csv) {
 
     let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
 
-    //console.log("remoteMocap",);
+    
     let nn=document.querySelectorAll('[networked-audio-source]');
     for (let n=0; n<nn.length; n++) {
         if (nn[n].components['networked'].data.owner==remoteClient) {
@@ -230,21 +234,152 @@ function remoteMocap(bs_csv) {
             } catch (e) {
               //  console.log(e);
             }
+
+            try {
+                applyPose(obj);    
+              } catch (e) {
+                //  console.log(e);
+              }
+
+              try {
+                console.log("remoteMocap",blendshapes_values[BODY_ANIM],blendshapes_values);
+                applyAnim(obj,blendshapes_values[BODY_ANIM]);    
+              } catch (e) {
+                //  console.log(e);
+              }
+              
             break;
         }
     }    
 }
+
+//document.querySelectorAll('[networked-audio-source]')[1].components['networked'].el.object3D.traverse((o) => {if (o.type == 'Bone') {if (o.name == 'RightArm') {window.RightArm=o} console.log(o.name)}})
 
 // iOS ArKit52
 function handleMocap(bs_csv) {
     //console.log(Date.now());
     if (window.AgoraRtcAdapter && window.AgoraRtcAdapter.sendMocap)    
     {
-        window.AgoraRtcAdapter.sendMocap(bs_csv);
+        let bs_csv_extra=bs_csv+","+local_body_anim;
+        if (local_body_anim>0) {
+            let bsv2 = bs_csv_extra.split(',');
+           // console.log("Enob",bsv2);
+        }
+        window.AgoraRtcAdapter.sendMocap(bs_csv_extra);
     }
     let blendshapes_values = bs_csv.split(',');
     let obj = document.getElementById("self-view").object3D;
     applyMocap(obj, blendshapes_values);
+}
+
+
+let x=false;
+let gltf_anims;
+
+async function loadAnimations(){
+    let loader = new THREE.GLTFLoader();
+    gltf_anims = (await loader.loadAsync('./assets/FemaleRPMAnims.glb'));
+}
+
+//let kanimation_mixer 
+async function playAnim(obj,anim_index){
+    if (!obj) {
+        return;
+    }
+
+    if (!gltf_anims) {
+        await loadAnimations();
+    }
+
+    let anim_clip = gltf_anims.animations[anim_index]; 
+    if (!anim_clip)
+        return;
+    const mixer_model = obj.children[0];
+    if (mixer_model.el.object3D.kanimation_mixer_ord==anim_index) {
+        return;
+    }
+    mixer_model.el.object3D.kanimation_mixer = new THREE.AnimationMixer(mixer_model);
+    mixer_model.el.object3D.kanimation_mixer_ord=anim_index;
+    const action = mixer_model.el.object3D.kanimation_mixer.clipAction(anim_clip);
+    action.play();
+}
+
+let animObj;
+async function applyAnim(obj,anim_index){
+    playAnim(obj,anim_index);
+}
+
+
+
+AFRAME.registerComponent('animate', {
+    schema: {
+        enabled: {default: false}
+    },
+    init: function () {
+        this.el.setAttribute('animation-mixer', {
+          clip: '*',
+          loop: 'repeat',
+          crossFadeDuration: 0.5,
+        })
+    },
+    tick: function tick(t, dt) {
+      if (this.el.object3D.kanimation_mixer && !isNaN(dt)) {
+          this.el.object3D.kanimation_mixer.update(dt / 1000);
+        //  console.log(this.el.object3D.kanimation_mixer._actions.length, this.el.object3D.kanimation_mixer._actions[0])
+      }
+        
+    }
+});
+
+
+function applyPose(obj){
+    if (!obj || self_loading) {
+        return;
+    }
+    /*
+    LeftShoulder: 
+106.93, 86.916, 22.384
+
+LeftArm: 
+85.722, 9.463, 0.925
+
+LeftForeArm:  
+0.556, 2.650, 18.417
+
+LeftHandThumb1: 
+15.883, 13.571, 39.602
+
+
+RightShoulder: 
+106.93, -86.916, -22.384
+
+RightArm: 
+85.722, -9.463, -0.925
+
+RightForeArm:  
+0.556, -2.650, -18.417
+
+RightHandThumb1: 
+15.883, -13.571, -39.602
+
+    getBone(obj, 'RightShoulder').rotation.set(THREE.Math.degToRad(106.93), THREE.Math.degToRad(-86.916),THREE.Math.degToRad( -22.384));
+    getBone(obj, 'RightArm').rotation.set(THREE.Math.degToRad(85.722),THREE.Math.degToRad(-9.463),THREE.Math.degToRad(-0.925));
+    getBone(obj, 'RightForeArm').rotation.set(THREE.Math.degToRad(0.556),THREE.Math.degToRad( -2.650), THREE.Math.degToRad(-18.417));
+    getBone(obj, 'RightHandThumb1').rotation.set(THREE.Math.degToRad(15.883), THREE.Math.degToRad(-13.571), THREE.Math.degToRad(-39.602));
+
+    */
+   /*
+    getBone(obj, 'RightShoulder').rotation.set(106.93, -86.916, -22.384);
+    getBone(obj, 'RightArm').rotation.set(85.722, -9.463, -0.925);
+    getBone(obj, 'RightForeArm').rotation.set(0.556, -2.650, -18.417);
+    getBone(obj, 'RightHandThumb1').rotation.set(15.883, -13.571, -39.602);
+
+
+    console.log('RightShoulder',getBone(obj,'RightShoulder').rotation);
+    console.log('RightArm',getBone(obj,'RightArm').rotation);
+    console.log('RightForeArm',getBone(obj,'RightForeArm').rotation);
+    console.log('RightHandThumb1',getBone(obj,'RightHandThumb1').rotation);
+*/
 }
 
 function applyMocap(obj, blendshapes_values){
@@ -497,7 +632,6 @@ if (!mediapipe || mediapipe === "true") {
 
 }
 
-
 let MorphData = {};
 
 function getMeshMorphData(obj) {
@@ -519,11 +653,12 @@ const readBlendshapesFromAvatar = function (meshMorphData, mesh) {
 
     mesh.traverse((o) => {
         if (o.type == 'Bone') {
-            // console.log(o.name);
             if (o.name == 'Neck' || o.name == 'Neck01' || o.name == 'Neck1_M') {
                 meshMorphData['neck'] = o;
             } else if (o.name == 'Head' || o.name == 'Head_M') {
                 meshMorphData['head'] = o;
+            } else {
+                meshMorphData[o.name] = o;
             }
         }
 
@@ -557,9 +692,9 @@ const playMorphTarget = function (obj, blendshape, amount) {
     let meshMorphData = getMeshMorphData(obj);
     meshMorphData['bs'].map(function (o, i) {
         if (o.morphTargetInfluences && o.userData.targetNames) {
-            var pos = o.userData.targetNames.findIndex(item => blendshape.toLowerCase() === item.toLowerCase());
+//            var pos = o.userData.targetNames.findIndex(item => blendshape.toLowerCase() === item.toLowerCase());
+            var pos = o.userData.targetNames.findIndex(item => blendshape === item);
             if (pos === -1) return;
-
             o.morphTargetInfluences[pos] = amount;
         }
 
@@ -698,7 +833,9 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
         obj.scale.set(1.3, 1.2, 1.2);
     }
     else if (avatar_style == 'rpm') {
-        obj.position.set(0, (-0.1 - height), -0.25);
+        //obj.position.set(0, (0.1 - height), -0.25);
+        obj.position.set(0, (0.74 - height), -0.25);
+        obj.scale.set(0.8, 0.7, 0.7);
         // keep for face work
         // obj.position.set(0, (0.35 - height),-0.4);
         // obj.rotation.set(0, 0, 0);
@@ -709,12 +846,36 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
         //obj.rotation.set(-0.2, 0, 0);
     }
     self_loading = false;
+
+    // spawn
+
+    let z=rand(1,3);
+    let x=rand(0,2);
+//    let ang=Math.atan((x-0)/(z-0));
+   // console.warn(z);
+    document.getElementById("rig").object3D.position.set(x,0,z);
+    if (z<0) {
+        document.getElementById("rig").object3D.rotation.y=Math.PI;
+    }
+
+     local_pos_x=document.getElementById("rig").object3D.position.x;
+     local_pos_z=document.getElementById("rig").object3D.position.z;
+
     // hide loader 
     if ( Window.sendBlendshapes) {
         Window.sendBlendshapes();        
     }
     document.querySelector('a-scene').emit('connect');
 });
+
+function rand(min,max){
+ let b=min+Math.random()*max;
+ let r=Math.round(Math.random()) ? 1 : -1;
+ console.warn("r",r);
+ b *=r; 
+ 
+ return b;
+}
 
 function init() {
 

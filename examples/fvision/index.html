@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="aframe-extras.min.js"></script>
+  <script src="Geometry.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-functions.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script>
+  <script src="bowser.min.js"></script>
+  <script src="twgl-full.min.js"></script>
+  <script src="mux.min.js"></script>
+  <script src="shaka-player.compiled.js"></script>
+  <script src="omniweb.min.js"></script> 
+  <script src="AgoraRTC_N-production.js"></script>
+  <script src="agora-rtm-sdk.js"></script>
+  <script src="forma-calling.min.js"></script> 
+  <script src="agora_example.js"></script> 
+  
+  <script>
+    
+      AFRAME.registerComponent('hologram', {
+        schema: {
+             loop: {
+                  type: "boolean",
+                  default: !1
+              },
+              muted: {
+                  type: "boolean",
+                  default: !0
+              }
+        },    
+        init: function () {                  
+          window.app.setRenderer(this.el,this.el.sceneEl.renderer);    
+        },    
+        tick: function tick(e, t) {
+          window.app.updateLoop(this.el.sceneEl.camera);          
+        },    
+        update: function () {
+        }
+      });
+      
+    </script>
+</head>
+
+<body>
+  <div style="position:absolute; top: 0px; left: 0px; z-index: 100;" id="controls"> 
+    <input type="text" id="room-input" placeholder="Room name..."/> 
+    <button id="connect-button" class="forma-button"> Connect 
+    </button> 
+    <button id="disconnect-button" class="forma-button"> Disconnect 
+    </button> 
+    </div> 
+
+  <a-scene id="scene" inspector-plugin-recast 
+  networked-scene="connectOnLoad: false;"
+  renderer="colorManagement: true; physicallyCorrectLights:true;" light="defaultLightsEnabled: false">
+
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="gym" src="assets/Gym.glb"></a-asset-item>
+      <a-asset-item id="nav_mesh" src="assets/Gym_Navmesh.glb"></a-asset-item>	  
+    </a-assets>
+	
+    <!-- Lights -->
+    <a-entity id="DirectionalLight" position="0 10 -2"
+      light="color: #ffffff; intensity: 2; castShadow:  true; shadowCameraRight:  3;  shadowCameraBottom:  -3;  shadowCameraLeft:  -3; shadowCameraTop:  4 shadowBias:  -0.0001;  shadowRadius:  4">
+    </a-entity>
+    <a-entity id="AmbientLight" position="0 0 0"
+      light="color: #ffffff; type: ambient; intensity: 2; castShadow:  false">
+    </a-entity>
+
+    <!-- World -->
+    <a-entity id="Gym" shadow="cast: false" gltf-model="#gym">
+    </a-entity>
+
+    <a-entity id="formavision"
+    position="0 0 0"
+    scale="1.2 1.2 1.2"
+    hologram="true">
+    <a-text visible="false" class="nametag" value="?" rotation="0 180 0" position=".25 -.35 0" side="double"
+    scale=".5 .5 .5"></a-text>
+  </a-entity>
+    
+
+    <!-- Navigation Mesh
+  <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
+ -->
+  <a-entity id="camera-rig"
+            tracked-vr-device
+            networked="template:#camera-rig-template; attachTemplateToLocal:false;"
+            position="0 0 2"
+	        rotation="0 0 0"
+            movement-controls="constrainToNavMesh: false;">
+    <!-- Pawn -->
+    <a-entity id="player"
+            networked="template:#avatar-template; attachTemplateToLocal:false;"
+            camera="active:true"
+            position="0 1.7 0" 
+            look-controls          
+            >
+    </a-entity>  
+  </a-entity>
+
+  </a-scene>
+
+</body>
+</html>

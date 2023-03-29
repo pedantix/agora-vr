@@ -36,7 +36,7 @@
           template: '#head-template',
           components: [
             'position',
-            'rotation',
+            'irotation',
             'player-info'
           ]
         });
@@ -47,6 +47,23 @@
   </script>
 
   <script>
+
+    let local_pos_x=-1;
+    let local_pos_z=-1;
+    let local_body_anim=0;
+    let local_base_anim=3;
+    let ANIM_IDLE=0;
+    let ANIM_WALKING=1;
+    let ANIM_DANCE=3;
+    let _state_stop_at=0;
+    let _state=0;
+    let STATE_STOP=0;
+    let STATE_MOVE=1;
+
+    // if not moved for X
+    // change to dance
+    // and not danced for Y
+
     AFRAME.registerComponent('player-info', {
       // notice that color and name are both listed in the schema; NAF will only keep
       // properties declared in the schema in sync.
@@ -81,9 +98,37 @@
          // this.el.object3D.rotation.x=0;
           //this.el.object3D.rotation.x=0;
           //this.el.object3D.rotation.z=0;
+        //  console.log(this.el.id,this.el.object3D.rotation.x,this.el.object3D.rotation.y,this.el.object3D.rotation.z);
          // console.log(this.el.id,this.el.object3D.rotation)
+        
+      } else {
+        if (local_pos_x!=-1 && local_pos_z!=-1) {
+          let pos=document.getElementById("rig").object3D.position;
+            let x=pos.x;
+            let z=pos.z;
+            if (local_pos_x!=x || local_pos_z!=z) {
+                local_pos_x=x;
+                local_pos_z=z;
+                local_body_anim=ANIM_WALKING;
+                _state=STATE_MOVE;
+            } else {
+              if (_state!=STATE_STOP) {
+                _state_stop_at=Date.now();
+                _state=STATE_STOP;
+              }
+              if (Date.now()-_state_stop_at>26000) {
+                _state_stop_at=Date.now(); // reset
+              }
+              else if (Date.now()-_state_stop_at>5000) {
+                local_body_anim=ANIM_DANCE;
+              } else {
+                local_body_anim=ANIM_IDLE;
+              }                
+            }
         }
-     
+        
+        //console.log(this.el.object3D.position.x,this.el.object3D.position.y);
+      }
     // if (this.data.enabled && this.data.elSource) {
     //    this.el.setAttribute('rotation', document.getElementById(this.data.elSource).getAttribute('rotation'));
    //   }
@@ -162,13 +207,14 @@
         <a-entity></a-entity>
       </template>
 
+    
       <template id="head-template">
         <a-entity class="avatar" player-info networked-audio-source>
-          <a-entity class="head" gltf-model="?" shadow="cast: true" rotation="0 180 0" position="0 -2.3 0"
+          <a-entity class="head" gltf-model="?" animate="enabled:true" shadow="cast: true" rotation="0 180 0" position="0 -2.3 0"
             scale="1.4 1.4 1.4" ifix-avatar-rotation=""></a-entity>
 
           <!-- here we add a text component for a nametag; the value will be updated by the player-info component -->
-          <a-text class="nametag" value="?" rotation="0 180 0" position=".25 -.35 0" side="double"
+          <a-text visible="false" class="nametag" value="?" rotation="0 180 0" position=".25 -.35 0" side="double"
             scale=".5 .5 .5"></a-text>
         </a-entity>
       </template>
@@ -226,28 +272,29 @@
   </div>
 
   <div style="font-family: sans-serif,monospace;
-  font-size: 13px;
-  width: 100%;
-  font-weight: 200;
-  line-height: 16px;
-  position: absolute;
-  right: 20px;
-  bottom: 20px;">
-    <button onclick="toggleDisco();" style="background-size: 90% 90%;
-  border: 0;
-  bottom: 0;
-  cursor: pointer;
-  min-width: 58px;
-  min-height: 34px;
-  padding-right: 6px;
-  padding-top: 0;
-  position: absolute;
-  right: 0;
-  transition: background-color .05s ease;
-  -webkit-transition: background-color .05s ease;
-  z-index: 9999;
-  border-radius: 8px;
-  touch-action: manipulation;">DISCO</button>
+      font-size: 13px;
+      width: 100%;
+      font-weight: 200;
+      line-height: 16px;
+      position: absolute;
+      right: 20px;
+      bottom: 20px;">
+    
+  <button onclick="toggleDisco();" style="background-size: 90% 90%;
+      border: 0;
+      bottom: 0;
+      cursor: pointer;
+      min-width: 58px;
+      min-height: 34px;
+      padding-right: 6px;
+      padding-top: 0;
+      position: absolute;
+      right: 0;
+      transition: background-color .05s ease;
+      -webkit-transition: background-color .05s ease;
+      z-index: 9999;
+      border-radius: 8px;
+     touch-action: manipulation;">DISCO</button>
   </div>
   <script src="./js/script.js"></script>
 

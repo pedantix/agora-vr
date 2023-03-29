@@ -1,0 +1,74 @@
+<script src="/assets/js/omnivor/bowser.min.js"></script>
+<script src="/assets/js/omnivor/twgl-full.min.js"></script>
+<script src="/assets/js/omnivor/omniweb.min.js?v=0"></script>
+<script src="/assets/js/omnivor/omni_3deck.js"></script>    
+
+
+<script>
+  var playerMap = new Map();
+
+  var hashCode = function(s){
+    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+  }
+
+  AFRAME.registerComponent('volumetricunit', {
+    schema: {
+        clipid: { type: 'string', default: "" },
+        videourl: { type: 'string', default: "" },
+        bytesurl: { type: 'string', default: "" },
+        metadataurl: { type: 'string', default: "" },
+    },
+
+    init: function () {
+      var el = this.el;
+      var data = this.data;
+      var cliphash = hashCode(data.clipid+data.videourl) ;
+      if (!playerMap.has(cliphash)){
+        this.mplayer = new ThreePlayer(this.el, data.clipid, data.videourl, data.bytesurl, data.metadataurl);
+        playerMap.set(cliphash , this.mplayer);
+      }else{
+        this.mplayer = playerMap.get(cliphash);
+        this.mplayer.updateScene(this.el);
+      }
+    },
+
+    resumeVolumetric: function(){
+      var el = this.el;
+      var data = this.data;      
+      var cliphash = hashCode(data.clipid+data.videourl) ;
+      this.mplayer = playerMap.get(cliphash);
+      this.mplayer.updateScene(this.el);
+    },
+
+    /**
+     * Called when component is attached and when component data changes.
+     * Generally modifies the entity based on the data.
+     */
+    update: function (oldData) { },
+
+    /**
+     * Called when a component is removed (e.g., via removeAttribute).
+     * Generally undoes all modifications to the entity.
+     */
+    remove: function () { },
+
+    /**
+     * Called on each scene tick.
+     */
+    // tick: function (t) { },
+
+    /**
+     * Called when entity pauses.
+     * Use to stop or remove any dynamic or background behavior such as events.
+     */
+    pause: function () {
+     },
+
+    /**
+     * Called when entity resumes.
+     * Use to continue or add any dynamic or background behavior such as events.
+     */
+    play: function () { 
+    }
+  });
+</script>
