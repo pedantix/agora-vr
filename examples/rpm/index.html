@@ -116,10 +116,10 @@
                 _state_stop_at=Date.now();
                 _state=STATE_STOP;
               }
-              if (Date.now()-_state_stop_at>26000) {
+              if (Date.now()-_state_stop_at>6000) {
                 _state_stop_at=Date.now(); // reset
               }
-              else if (Date.now()-_state_stop_at>5000) {
+              else if (Date.now()-_state_stop_at>8000) {
                 local_body_anim=ANIM_DANCE;
               } else {
                 local_body_anim=ANIM_IDLE;
