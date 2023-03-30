@@ -254,6 +254,11 @@ function remoteMocap(bs_csv) {
 }
 
 //document.querySelectorAll('[networked-audio-source]')[1].components['networked'].el.object3D.traverse((o) => {if (o.type == 'Bone') {if (o.name == 'RightArm') {window.RightArm=o} console.log(o.name)}})
+function handlePoseMocap(bs_csv) {
+    console.log(bs_csv);
+}
+
+window.handlePoseMocap = handlePoseMocap;
 
 // iOS ArKit52
 function handleMocap(bs_csv) {
@@ -879,7 +884,7 @@ function rand(min,max){
 
 function init() {
 
-    console.error("init", avatar_style)
+    //console.error("init", avatar_style)
     if (avatar_style == 'nico') {
         self_loading = true;
         let v = './assets/NicoARKit.glb';
@@ -899,7 +904,7 @@ function init() {
     }
 
     if (!mediapipe || mediapipe === "true") {
-        console.error("getUserMedia");
+       // console.error("getUserMedia");
         const constraints = {
             video: { width: 320, height: 180, rameRate: 15 },
             audio: true
@@ -919,21 +924,16 @@ document.querySelector('a-scene').addEventListener('deviceorientationpermissiong
     console.log("deviceorientationpermissiongranted");
 })
 
-
-
-
 document.body.addEventListener('clientConnected', function (evt) {
-    console.error('clientConnected event. clientId =', evt.detail.clientId, evt );
+    console.log('clientConnected event. clientId =', evt.detail.clientId, evt );
   });
-
 
   document.body.addEventListener('entityCreated', function (evt) {
-    console.error('entityCreated event', evt.detail.el, evt);
+    console.log('entityCreated event', evt.detail.el, evt);
   });
 
-
   document.body.addEventListener('connected', function (evt) {
-    console.error('connected event. clientId =', evt.detail.clientId, evt);
+    console.log('connected event. clientId =', evt.detail.clientId, evt);
   });
 /*
 if (document.querySelector('a-scene').emit) {
