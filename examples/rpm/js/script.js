@@ -208,7 +208,7 @@ let BS_PITCH=53;
 let BS_ROLL=54;
 
 let BS_TOTAL_COUNT=56;
-let BODY_ANIM=56; // extra
+let BODY_ANIM=55; // extra
 
 //map string to pos
 let rpm_blendshape_location_map={};
@@ -476,7 +476,7 @@ function onResultsFaceMesh(results) {
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
             
             let blendshapes=[];
-            for (var i = 1; i <= BS_TOTAL_COUNT; i++) {
+            for (let i = 1; i < BS_TOTAL_COUNT; i++) {
                 blendshapes.push(0);
             }
 

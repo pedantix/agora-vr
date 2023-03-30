@@ -249,7 +249,7 @@
     <a-entity id="hangar" shadow="cast: false" visible="true" gltf-model="#hangari"></a-entity>
     <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
 
-    <a-entity id="rig" movement-controls="constrainToNavMesh: true;" networked="template:#rig-template;">
+    <a-entity id="rig" movement-controls="constrainToNavMesh: true; fly:false; speed: 0.09" networked="template:#rig-template;">
       <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
 
         <a-entity id="self-view" gltf-model="?" position="0 -0.21 -0.25" rotation="-25 0 0" scale="1.3 1.2 1.2">
