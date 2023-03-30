@@ -477,11 +477,7 @@ function onResultsFaceMesh(results) {
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
             
             let blendshapes=[];
-<<<<<<< HEAD
-            for (let i = 1; i < BS_TOTAL_COUNT; i++) {
-=======
             for (var i = 0; i < BS_TOTAL_COUNT; i++) {
->>>>>>> 88bfe9b41b3c3965c3cab1055b109e21cd77e1a4
                 blendshapes.push(0);
             }
 
