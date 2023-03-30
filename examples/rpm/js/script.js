@@ -206,8 +206,8 @@ let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOute
 let BS_YAW=52;
 let BS_PITCH=53;
 let BS_ROLL=54;
+let BS_TOTAL_COUNT=55;
 
-let BS_TOTAL_COUNT=56;
 let BODY_ANIM=55; // extra
 
 //map string to pos
@@ -222,6 +222,7 @@ function remoteMocap(bs_csv) {
 
     let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
+    //console.error(local_body_anim+" REM "+blendshapes_values.length);
 
     
     let nn=document.querySelectorAll('[networked-audio-source]');
@@ -263,13 +264,13 @@ window.handlePoseMocap = handlePoseMocap;
 // iOS ArKit52
 function handleMocap(bs_csv) {
     //console.log(Date.now());
+    //console.log("POP "+bs_csv.split(',').length);
     if (window.AgoraRtcAdapter && window.AgoraRtcAdapter.sendMocap)    
     {
         let bs_csv_extra=bs_csv+","+local_body_anim;
-        if (local_body_anim>0) {
-            let bsv2 = bs_csv_extra.split(',');
-           // console.log("Enob",bsv2);
-        }
+        //if (local_body_anim>0) {
+        //    let bsv2 = bs_csv_extra.split(',');
+       // }
         window.AgoraRtcAdapter.sendMocap(bs_csv_extra);
     }
     let blendshapes_values = bs_csv.split(',');
@@ -400,9 +401,9 @@ function applyMocap(obj, blendshapes_values){
     let head = getBone(obj, 'head');
     let neck = getBone(obj, 'neck');
 
-    let pitch = blendshapes_values[BS_PITCH];
-    let yaw = blendshapes_values[BS_YAW];
-    let roll = blendshapes_values[BS_ROLL];
+    let pitch = headLimit(blendshapes_values[BS_PITCH]);
+    let yaw = headLimit(blendshapes_values[BS_YAW]);
+    let roll = headLimit(blendshapes_values[BS_ROLL]);
 
     if (avatar_style == 'rpm') {
         head.rotation.x = 0.6 * pitch;
@@ -476,7 +477,11 @@ function onResultsFaceMesh(results) {
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
             
             let blendshapes=[];
+<<<<<<< HEAD
             for (let i = 1; i < BS_TOTAL_COUNT; i++) {
+=======
+            for (var i = 0; i < BS_TOTAL_COUNT; i++) {
+>>>>>>> 88bfe9b41b3c3965c3cab1055b109e21cd77e1a4
                 blendshapes.push(0);
             }
 
@@ -572,6 +577,11 @@ function onResultsFaceMesh(results) {
     canvasCtx.restore();
 }
 
+function headLimit(val) {
+    if (val > 0.6) return 0.6;
+    if (val < -0.6) return -0.6;
+    return val;
+}
 function blendshapeLimit(val) {
     if (val > 0.9) return 0.9;
     if (val < 0) return 0;
