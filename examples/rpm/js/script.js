@@ -59,7 +59,7 @@ function subscribe(event) {
         console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
     }
 
-    console.warn("json", json);
+    //console.warn("json", json);
 }
 
 function parse(event) {
@@ -216,18 +216,59 @@ for (let i=0; i<rpm_blendshapes.length;i++){
     rpm_blendshape_location_map[rpm_blendshapes[i]]=i;
 }
 
-let win_anim=0;
-// iOS ArKit52
+
+var mocap_frames=[]
+var mocap_delta=10;
+var mocap_forward=40;
+var mocap_latency=100;
+
+
 function remoteMocap(bs_csv) {
+
+    //console.log("bs_csv",bs_csv.length);
+
+    //remoteMocapProcess(bs_csv);
+    //return;
+    let item={};
+    item[0]=Date.now();
+    item[1]=bs_csv;
+
+    mocap_frames.push(item);
+  //  console.log("counting xs length "+mocap_frames.length+" "+ item[0]);
+    /*
+    while (mocap_frames.length>mocap_forward) {
+      console.log("shifting xs "+mocap_frames.length+" "+ item[0]);
+      mocap_frames.shift();
+    }*/
+}
+
+setInterval(remoteMocapOut, mocap_delta);
+
+function remoteMocapOut() {
+    if (!mocap_frames.length)
+        return;
+
+    let d=Date.now();
+    while (mocap_frames.length && d-(mocap_frames[0][0])>=mocap_latency){
+      //  console.log("shifting "+mocap_frames[0][0]+" length "+mocap_frames.length);
+        let item=mocap_frames.shift();
+        //console.log("processing now with latency of ",d,(d-item[0]));
+        remoteMocapProcess(item[1]);
+    }
+}
+
+//let win_anim=0;
+// iOS ArKit52
+function remoteMocapProcess(bs_csv) {
 
     let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
-    //console.error(local_body_anim+" REM "+blendshapes_values.length);
-
-    
+    //console.error(local_body_anim+" REM "+blendshapes_values.length);    
     let nn=document.querySelectorAll('[networked-audio-source]');
     for (let n=0; n<nn.length; n++) {
-        if (nn[n].components['networked'].data.owner==remoteClient) {
+        if (nn[n].components['networked'] && 
+            nn[n].components['networked'].data && 
+            nn[n].components['networked'].data.owner==remoteClient) {
             //console.log("match ",remoteClient);
             let obj=nn[n].components['networked'].el.object3D;
             try {
@@ -278,7 +319,6 @@ function handleMocap(bs_csv) {
     applyMocap(obj, blendshapes_values);
 }
 
-
 let x=false;
 let gltf_anims;
 
@@ -314,8 +354,6 @@ let animObj;
 async function applyAnim(obj,anim_index){
     playAnim(obj,anim_index);
 }
-
-
 
 AFRAME.registerComponent('animate', {
     schema: {
@@ -475,11 +513,12 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
 */
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
-            
+            let blendshapes=new Array(BS_TOTAL_COUNT).fill(0);
+            /*
             let blendshapes=[];
             for (var i = 0; i < BS_TOTAL_COUNT; i++) {
                 blendshapes.push(0);
-            }
+            }*/
 
             let pitch=landmarks[TOP].z - landmarks[BOTTOM].z;
             let yaw=landmarks[LEFT].z - landmarks[RIGHT].z;
@@ -574,8 +613,8 @@ function onResultsFaceMesh(results) {
 }
 
 function headLimit(val) {
-    if (val > 0.6) return 0.6;
-    if (val < -0.6) return -0.6;
+    if (val > 0.4) return 0.4;
+    if (val < -0.4) return -0.4;
     return val;
 }
 function blendshapeLimit(val) {
@@ -876,19 +915,20 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     if ( Window.sendBlendshapes) {
         Window.sendBlendshapes();        
     }
+    //setTimeout(() => {document.querySelector('a-scene').emit('connect');},1000);
     document.querySelector('a-scene').emit('connect');
 });
 
 function rand(min,max){
  let b=min+Math.random()*max;
  let r=(new Date()).getMilliseconds()%2 ? 1 : -1;
- console.warn("r",r,b);
+ //console.warn("r",r,b);
  b *=r; 
  
  return b;
 }
 
-function init() {
+async function init() {
 
     //console.error("init", avatar_style)
     if (avatar_style == 'nico') {
@@ -911,8 +951,32 @@ function init() {
 
     if (!mediapipe || mediapipe === "true") {
        // console.error("getUserMedia");
+
+       /*
+       navigator.mediaDevices.enumerateDevices()
+       .then((devices) => {
+         devices.forEach((device) => {
+           console.info(` BOB73 ${device.kind}: ${device.label} id = ${device.deviceId}`);
+         });
+       })
+       .catch((err) => {
+         console.error(`${err.name}: ${err.message}`);
+       });
+        */
+       let deviceId=null;
+       let cams = await AgoraRTC.getCameras();
+       for (var i = 0; i < cams.length; i++) {
+         if (cams[i].label.indexOf("FaceTime") == 0) {
+           console.warn("select FaceTime camera", cams[i].deviceId);
+           deviceId=cams[i].deviceId;
+   
+         }
+        }
+
         const constraints = {
-            video: { width: 320, height: 180, rameRate: 15 },
+            video: { 
+                deviceId : deviceId ? {exact: deviceId} : {} , width: 320, height: 180, rameRate: 15 
+            },
             audio: true
         };
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {

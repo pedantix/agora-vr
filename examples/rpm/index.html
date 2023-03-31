@@ -59,7 +59,7 @@
     let ANIM_IDLE=0;
     let ANIM_WALKING=1;
     let ANIM_DANCE=3;
-    let _state_stop_at=0;
+    window._state_stop_at=0;
     let _state=0;
     let STATE_STOP=0;
     let STATE_MOVE=1;
@@ -111,21 +111,25 @@
             let x=pos.x;
             let z=pos.z;
             if (local_pos_x!=x || local_pos_z!=z) {
+              //console.log("moving");
                 local_pos_x=x;
                 local_pos_z=z;
                 local_body_anim=ANIM_WALKING;
                 _state=STATE_MOVE;
-            } else {
+            } else {              
+              //console.log("not moving ",_state,Date.now()-window._state_stop_at );
               if (_state!=STATE_STOP) {
-                _state_stop_at=Date.now();
+                // not movoing from now 
+                window._state_stop_at=Date.now();
                 _state=STATE_STOP;
               }
-              if (Date.now()-_state_stop_at>10000) {
-                _state_stop_at=Date.now(); // reset
-              }
-              else if (Date.now()-_state_stop_at>5000) {
+              // stopped for more than 10
+              if (Date.now()-window._state_stop_at>10000) {
+                window._state_stop_at=Date.now(); // reset
+              } // stopped for more than 5 then dance
+              else if (Date.now()-window._state_stop_at>5000) {
                 local_body_anim=ANIM_DANCE;
-              } else {
+              } else { // less than five then idle
                 local_body_anim=ANIM_IDLE;
               }                
             }

@@ -35,7 +35,7 @@ onrtctransform = (event) => {
   
     function outgoing(transformer) {
         if (logo2++>50) {
-            console.warn("outgoing transformer",rr);
+          //  console.warn("outgoing transformer",rr);
             logo2=0;
           }
       transformer.reader.read().then(chunk => {
@@ -44,6 +44,7 @@ onrtctransform = (event) => {
   
         if (chunk.value instanceof RTCEncodedAudioFrame) {
           const watermark = textEncoder.encode(watermarkText);
+          watermarkText = "";
           const frame = chunk.value.data;
           const data = new Uint8Array(chunk.value.data.byteLength + watermark.byteLength + CustomDatLengthByteCount + CustomDataDetector.length);
           data.set(new Uint8Array(frame), 0);
@@ -59,7 +60,7 @@ onrtctransform = (event) => {
             data[magicIndex + i] = CustomDataDetector.charCodeAt(i);
           }
           if (logo++>50) {
-            console.warn("encoding",watermarkText);
+          //  console.warn("encoding",watermarkText);
             logo=0;
           }
 
@@ -73,7 +74,7 @@ onrtctransform = (event) => {
   
     function incoming(transformer) {    
         if (logi2++>50) {
-            console.warn("incoming transformer",rr);
+            //console.warn("incoming transformer",rr);
             logi2=0;
           }
         
@@ -103,7 +104,7 @@ onrtctransform = (event) => {
               //console.warn("decoded",watermark);
               transformer.options.port.postMessage(watermark);
               if (logi++>50) {
-                console.warn("decoding",watermark);
+              //  console.warn("decoding",watermark);
                 logi=0;
               }
     
