@@ -221,17 +221,31 @@ var mocap_frames=[]
 var mocap_delta=10;
 var mocap_forward=40;
 var mocap_latency=100;
-
+let remote_arrivals={};
+var remote_arrivals_min_time=5000;
 
 function remoteMocap(bs_csv) {
+    let blendshapes_values = bs_csv.split(',');
+    let remoteClient=blendshapes_values[blendshapes_values.length-1];
+    let t=remote_arrivals[remoteClient];
+    let d=Date.now();
+    if (!t) {
+        remote_arrivals[remoteClient]=d;
+        return;
+    }
 
+    if (d-t<remote_arrivals_min_time) {
+        console.log("too early for "+remoteClient);
+    }
+
+    // different streams per remote 
     //console.log("bs_csv",bs_csv.length);
 
     //remoteMocapProcess(bs_csv);
     //return;
     let item={};
     item[0]=Date.now();
-    item[1]=bs_csv;
+    item[1]=blendshapes_values;
 
     mocap_frames.push(item);
   //  console.log("counting xs length "+mocap_frames.length+" "+ item[0]);
@@ -259,9 +273,9 @@ function remoteMocapOut() {
 
 //let win_anim=0;
 // iOS ArKit52
-function remoteMocapProcess(bs_csv) {
+function remoteMocapProcess(blendshapes_values) {
 
-    let blendshapes_values = bs_csv.split(',');
+    //let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
     //console.error(local_body_anim+" REM "+blendshapes_values.length);    
     let nn=document.querySelectorAll('[networked-audio-source]');
