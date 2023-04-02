@@ -227,16 +227,21 @@ var remote_arrivals_min_time=5000;
 function remoteMocap(bs_csv) {
     let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
-    let t=remote_arrivals[remoteClient];
+    //let t=remote_arrivals[remoteClient];
     let d=Date.now();
+    /*
     if (!t) {
         remote_arrivals[remoteClient]=d;
         return;
     }
-
-    if (d-t<remote_arrivals_min_time) {
+        if (d-t<remote_arrivals_min_time) {
         console.log("too early for "+remoteClient);
     }
+
+*/
+    if (!glb_loaded[remoteClient])
+        return;
+
 
     // different streams per remote 
     //console.log("bs_csv",bs_csv.length);
@@ -764,9 +769,23 @@ const playMorphTarget = function (obj, blendshape, amount) {
 
     });
 }
+// female
+// script.js:781 2.8858627370837384 2.214193741692381
+// script.js:784 2.283948673553403 1.9150916344369762
+// script.js:784 3.1112554571379354 2.3407151298180278
+//script.js:786 2.158768332019335
+// female 
 
 function avatarHeight(obj) {
     var box = new THREE.Box3().setFromObject(obj);
+
+    deltaX = box.max.x - box.min.x;
+    deltaY = box.max.y - box.min.y;
+    deltaZ = box.max.z - box.min.z;
+
+    var h2= Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+   // return h2;
+    console.error(h2,box.max.y - box.min.y);
     return box.max.y - box.min.y;
 }
 
@@ -887,7 +906,8 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     if (e.target.id!="self-view")
     return;
     let obj = document.getElementById("self-view").object3D;
-    let height = avatarHeight(obj);
+ 
+
     console.log("model-loaded", e);
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.1, -0.7);
@@ -898,8 +918,20 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
     else if (avatar_style == 'rpm') {
         //obj.position.set(0, (0.1 - height), -0.25);
-        obj.position.set(0, (0.74 - height), -0.25);
-        obj.scale.set(0.8, 0.7, 0.7);
+        //obj.position.set(0, (0.74 - height), -0.25);
+        //obj.scale.set(0.8, 0.7, 0.7);
+
+        //obj.position.set(-0.05, (1.98 - height), -0.05);
+        //obj.scale.set(0.095, 0.095, 0.095);
+        //obj.rotation.set(-0.6, 0.5, -0.2);
+
+        //obj.position.set(-0.07, (1.9 - height), -0.05);
+        obj.scale.set(0.095, 0.095, 0.095);
+        let height = avatarHeight(obj);
+        console.error(height);
+        obj.position.set(-0.07, (-0.2+ 0.175 - height), -0.05);
+        obj.rotation.set(-0.4, 0.6, -0.15);
+
         // keep for face work
         // obj.position.set(0, (0.35 - height),-0.4);
         // obj.rotation.set(0, 0, 0);
@@ -960,7 +992,10 @@ async function init() {
     }
     else if (avatar_style == 'rpm') {
         frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
-        document.getElementById('frame').hidden = false;
+            document.getElementById('frame').hidden = false;
+       // let v = 'https://models.readyplayer.me/64272f4020a87b0586ad3c58.glb';
+       // document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+       // document.getElementById("self-view").setAttribute('gltf-model', v);
     }
 
     if (!mediapipe || mediapipe === "true") {

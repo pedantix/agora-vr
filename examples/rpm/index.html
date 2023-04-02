@@ -14,14 +14,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
   <script src="/easyrtc/easyrtc.js"></script>
   <script src="/js/vbg0.js"></script>
+  <script src="/js/gui_controls.js"></script>
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-  <!--<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.16.1.js"></script>-->
   <script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@1.5.1/index.js"></script>
   <script src="/dist/networked-aframe.js"></script>
   <script src="/dist/naf-agora-adapter.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
-  <script src="/js/Geometry.js"></script>
-
+  <script src="/js/Geometry.js"></script>   
+  
+  
   <!--Media Pipe-->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -63,7 +64,7 @@
     let _state=0;
     let STATE_STOP=0;
     let STATE_MOVE=1;
-
+    let glb_loaded={};
     // if not moved for X
     // change to dance
     // and not danced for Y
@@ -80,6 +81,13 @@
         this.head = this.el.querySelector('.head');
         this.nametag = this.el.querySelector('.nametag');
 
+        if (this.head){
+          var that=this;
+        this.head.addEventListener('model-loaded', function (event) {
+          //console.warn(that,that.el.id,that.el.firstUpdateData.owner);
+          glb_loaded[that.el.firstUpdateData.owner]=that.el.firstUpdateData.owner
+        });
+      }
         this.ownedByLocalUser = this.el.id === 'player';
         if (this.ownedByLocalUser) {
           // populate the html overlay with the correct name on init
@@ -149,12 +157,18 @@
       }
     });
   </script>
-
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" />
   <style>
+    .fa, .fab, .fas, .far {
+      cursor:pointer;
+      font-size:30px;
+      margin:8px;
+    }
+
     .videoUI {
       position: fixed;
       bottom: 0px;
-      left: 0px;
+      left: -1000px;
       width: 320px;
       height: 90px;
       z-index: 15;
@@ -255,14 +269,13 @@
 
     <a-entity id="rig" movement-controls="constrainToNavMesh: true; fly:false; speed: 0.09" networked="template:#rig-template;">
       <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
-
-        <a-entity id="self-view" gltf-model="?" position="0 -0.21 -0.25" rotation="-25 0 0" scale="1.3 1.2 1.2">
-          <a-text id="touchmouse" color="white" value="Use touch or arrow keys to move" rotation="25 0 0" position="-0.12 0.16 -0.1"
-            side="double" scale="0.08 0.08 0.08"></a-text>
-          <a-text id="loading" color="black" value="Loading Avatar" rotation="25 0 0" position="-0.08 0.06 -0.1"
-            side="double" scale="0.1 0.1 0.1"></a-text>
-          <a-entity id="loadeye" gltf-model="./assets/Eye.glb" rotation="15 0 0" position="0 0.12 -0.3" side="double"
-            scale="0.2 0.2 0.2"></a-entity>
+        <a-entity id="self-view" gltf-model="?" position="0 0 0" rotation="0 0 0" scale="1 1 1">
+          <a-text id="touchmouse" color="hotpink" value="Touch screen or arrow keys to move around" rotation="0 0 0" position="-0.086 -0.07 -0.1"
+            side="double" scale="0.04 0.04 0.04"></a-text>
+          <a-text opacity="0.5" id="loading" color="black" value="Loading Avatar" rotation="25 0 0" position="-0.04 -0.055 -0.1"
+            side="double" scale="0.05 0.05 0.05"></a-text>
+          <a-entity id="loadeye" gltf-model="./assets/Eye.glb" rotation="-15 0 0" position="0 -0.14 -0.4" side="double"
+            scale="0.16 0.16 0.16"></a-entity>
         </a-entity>
       </a-entity>
     </a-entity>
@@ -291,26 +304,47 @@
       right: 20px;
       bottom: 20px;">
     
-  <button onclick="toggleDisco();" style="background-size: 90% 90%;
-      border: 0;
-      bottom: 0;
-      cursor: pointer;
-      min-width: 58px;
-      min-height: 34px;
-      padding-right: 6px;
-      padding-top: 0;
-      position: absolute;
-      right: 0;
-      transition: background-color .05s ease;
-      -webkit-transition: background-color .05s ease;
-      z-index: 9999;
-      border-radius: 8px;
-     touch-action: manipulation;">DISCO</button>
+    <div onclick="toggleDisco();" style="background-size: 90% 90%;
+        border: 0;
+        bottom: 70px;
+        cursor: pointer;
+        right: -10px;
+        min-width: 58px;
+        min-height: 34px;
+        padding-right: 6px;
+        padding-top: 0;
+        position: absolute;
+        transition: background-color .05s ease;
+        -webkit-transition: background-color .05s ease;
+        z-index: 9999;
+        border-radius: 8px;
+        touch-action: manipulation;">
+        <i class="fa fa-music" style="width:100%;   color:hotpink;"></i> </div>
+
+    <div onclick="alert(0); toggleMic('com6')" style="
+        border: 0;
+        bottom: 160px;
+        cursor: pointer;
+        min-width: 58px;
+        min-height: 34px;
+        padding-right: 6px;
+        padding-top: 0;
+        position: absolute;
+        right: -18px;
+        transition: background-color .05s ease;
+        -webkit-transition: background-color .05s ease;
+        z-index: 9999;
+        border-radius: 8px;
+        touch-action: manipulation;">
+     <i class="fa fa-microphone" style="width:100%;   color:hotpink;"></i> 
+    </div>
+  
   </div>
   <script src="./js/script.js"></script>
 
   <script>
-
+    user_seat=true;
+  	addControls();
   </script>
 </body>
 
