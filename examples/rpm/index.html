@@ -21,7 +21,7 @@
   <script src="/dist/naf-agora-adapter.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
   <script src="/js/Geometry.js"></script>   
-  
+  <!--script src="/js/spawn-in-circle.component.js"></script-->   
   
   <!--Media Pipe-->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -165,9 +165,12 @@
       margin:8px;
     }
 
+    .a-enter-vr-button{
+      display:none;
+    }
+
     .videoUI {
       position: fixed;
-      bottom: 0px;
       left: -1000px;
       width: 320px;
       height: 90px;
@@ -268,8 +271,8 @@
     <a-entity id="hangar" shadow="cast: false" visible="true" gltf-model="#hangari"></a-entity>
     <a-entity id="navmesh" visible="false" nav-mesh position="0.0 0.0 0.0" gltf-model="#nav_mesh"></a-entity>
 
-    <a-entity id="rig" movement-controls="constrainToNavMesh: true; fly:false; speed: 0.09" networked="template:#rig-template;">
-      <a-entity id="player" camera position="0 2.3 0" look-controls networked="template:#head-template;" visible="true">
+    <a-entity id="rig"     movement-controls="constrainToNavMesh: true; fly:false; speed: 0.09" networked="template:#rig-template;">
+      <a-entity id="player" camera position="0 2.3 0"  look-controls networked="template:#head-template;" visible="true">
         <a-entity id="self-view" gltf-model="?" position="0 0 0" rotation="0 0 0" scale="1 1 1">
           <a-text id="touchmouse"  visible="false" color="darkred" value="Use arrow keys and Q or E to move around" rotation="0 0 0" position="-0.066 -0.07 -0.1"
             side="double" scale="0.03 0.03 0.03"></a-text>
@@ -303,7 +306,7 @@
       line-height: 16px;
       position: absolute;
       right: 20px;
-      bottom: 20px;">
+      bottom: -20px;">
     
     <div onclick="toggleDisco();" style="background-size: 90% 90%;
         border: 0;

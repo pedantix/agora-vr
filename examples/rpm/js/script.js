@@ -798,7 +798,6 @@ function avatarHeight(obj) {
     //return box.max.y - box.min.y;
 }
 
-
 function testBS() {
     let obj = document.getElementById("self-view").object3D;
     playMorphTarget(obj, rpm_blendshapes[51], 0);
@@ -891,10 +890,11 @@ setInterval(() => {
     animateLoading();
 }, 30);
 
+/*
 setInterval(() => {
     positionSelfView();
-}, 5000);
-
+}, 1000);
+*/
 setInterval(() => {
     animateDiscoLight();
 }, 120);
@@ -944,18 +944,18 @@ function positionSelfView(){
         let height = avatarHeight(obj);
         let w=window.innerWidth;
         console.log(w,height);
-        if (w<500) {
-            obj.position.set(-0.02, (0.07 - height), -0.05);
+        if (w<510) {
+            obj.position.set(-0.02, (0.065 - height), -0.05);
             obj.rotation.set(-0.4, 0.4, -0.11);
         }
-        else if (w<700) {
+        else if (w<810) {
             obj.position.set(-0.035, (0.07 - height), -0.05);
             obj.rotation.set(-0.4, 0.5, -0.13);
-        } else if (w<1200) {
-            obj.position.set(-0.06,  (0.075 - height), -0.05);
+        } else if (w<1210) {
+            obj.position.set(-0.08,  (0.075 - height), -0.05);
             obj.rotation.set(-0.4, 0.6, -0.15);
         } else {
-            obj.position.set(-0.11, (0.08 - height), -0.05);
+            obj.position.set(-0.10, (0.08 - height), -0.05);
             obj.rotation.set(-0.4, 0.8, -0.2);
         }
  /*    
@@ -979,48 +979,43 @@ function positionSelfView(){
 document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
     if (e.target.id!="self-view")
     return;
-    let obj = document.getElementById("self-view").object3D;
- 
+
+    //    let obj = document.getElementById("self-view").object3D;
     document.getElementById('touchmouse').setAttribute('visible','false');
     document.getElementById('loadeye').setAttribute('visible','false');
     document.getElementById('loading').setAttribute('visible','false');
     document.getElementById('uiicons').style.display='block';
     
-
-  //  console.log("model-loaded", e);
-
     self_loading = false;
-
-    // spawn
-
+    // spawn    
     let z=rand(1,3);
     let x=rand(0,2);
-//    let ang=Math.atan((x-0)/(z-0));
-   // console.warn(z);
+    console.error(x,z);
     document.getElementById("rig").object3D.position.set(x,0,z);
     if (z<0) {
         document.getElementById("rig").object3D.rotation.y=Math.PI;
     }
-
-     local_pos_x=document.getElementById("rig").object3D.position.x;
-     local_pos_z=document.getElementById("rig").object3D.position.z;
-
+    local_pos_x=document.getElementById("rig").object3D.position.x;
+    local_pos_z=document.getElementById("rig").object3D.position.z;
+    
     // hide loader 
     if ( Window.sendBlendshapes) {
         Window.sendBlendshapes();        
     }
-    //setTimeout(() => {document.querySelector('a-scene').emit('connect');},1000);
+
     document.querySelector('a-scene').emit('connect');
-    positionSelfView();
+    setTimeout(() => {
+        positionSelfView();
+    }, 1000);
+ //   positionSelfView();
 });
 
 function rand(min,max){
- let b=min+Math.random()*max;
- let r=(new Date()).getMilliseconds()%2 ? 1 : -1;
- //console.warn("r",r,b);
- b *=r; 
- 
- return b;
+    let b=min+Math.random()*max;
+    let r=(new Date()).getMilliseconds()%2 ? 1 : -1;
+
+    b *=r; 
+    return b;
 }
 
 async function init() {
@@ -1033,9 +1028,6 @@ async function init() {
         document.getElementById('touchmouse').object3D.position.x=-0.055;
     }
 
-
-
-    //console.error("init", avatar_style)
     if (avatar_style == 'nico') {
         self_loading = true;
         let v = './assets/NicoARKit.glb';
@@ -1078,8 +1070,7 @@ async function init() {
        for (var i = 0; i < cams.length; i++) {
          if (cams[i].label.indexOf("FaceTime") == 0) {
            console.warn("select FaceTime camera", cams[i].deviceId);
-           deviceId=cams[i].deviceId;
-   
+           deviceId=cams[i].deviceId;   
          }
         }
 
@@ -1093,7 +1084,6 @@ async function init() {
             camera.start();
         });
     }
-  //  document.querySelector('a-scene').emit('connect');
 }
 
 document.querySelector('a-scene').addEventListener('loaded', function () {
@@ -1108,27 +1098,14 @@ document.body.addEventListener('clientConnected', function (evt) {
     console.log('clientConnected event. clientId =', evt.detail.clientId, evt );
   });
 
-  document.body.addEventListener('entityCreated', function (evt) {
-    console.log('entityCreated event', evt.detail.el, evt);
-  });
+document.body.addEventListener('entityCreated', function (evt) {
+console.log('entityCreated event', evt.detail.el, evt);
+});
 
-  document.body.addEventListener('connected', function (evt) {
-    console.log('connected event. clientId =', evt.detail.clientId, evt);
-  });
+document.body.addEventListener('connected', function (evt) {
+console.log('connected event. clientId =', evt.detail.clientId, evt);
+});
 
-    window.addEventListener('resize', function(event) {
-        positionSelfView();
-       // console.warn("window resize ",window.innerWidth);
-    }, true);
-
-
-/*
-if (document.querySelector('a-scene').emit) {
-    init();
-}
-//else {
-    document.querySelector('a-scene').addEventListener('loaded', function () {
-        init()
-    })
-//}
-*/
+window.addEventListener('resize', function(event) {
+    positionSelfView();
+}, true);

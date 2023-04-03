@@ -1,3 +1,4 @@
+
 /* global AFRAME, THREE */
 AFRAME.registerComponent('spawn-in-circle', {
   schema: {
@@ -10,15 +11,16 @@ AFRAME.registerComponent('spawn-in-circle', {
 
     var angleRad = this.getRandomAngleInRadians();
     var circlePoint = this.randomPointOnCircle(this.data.radius, angleRad);
+    console.error('circlePoint',circlePoint);
     var worldPoint = {x: circlePoint.x + center.x, y: center.y, z: circlePoint.y + center.z};
     el.setAttribute('position', worldPoint);
-    // console.log('world point', worldPoint);
+     console.error('world point', worldPoint);
 
     var angleDeg = angleRad * 180 / Math.PI;
     var angleToCenter = -1 * angleDeg + 90;
-    angleRad = THREE.Math.degToRad(angleToCenter);
+    angleRad = THREE.MathUtils.degToRad(angleToCenter);
     el.object3D.rotation.set(0, angleRad, 0);
-    // console.log('angle deg', angleDeg);
+     console.error('angle deg', angleDeg);
   },
 
   getRandomAngleInRadians: function() {
