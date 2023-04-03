@@ -20,6 +20,10 @@ function getParameterByName(name, url = window.location.href) {
         return null;
 }
 
+function isMobile() {
+    return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  }
+
 var avatar_style = getParameterByName("avatar");
 if (!avatar_style) {
     avatar_style = 'rpm';
@@ -50,6 +54,10 @@ function subscribe(event) {
         let v = json.data.url + "?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
         MorphData = {};
         self_loading = true;
+        document.getElementById('touchmouse').setAttribute('visible','true');
+        document.getElementById('loadeye').setAttribute('visible','true');
+        document.getElementById('loading').setAttribute('visible','true');
+
         document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
      }
@@ -785,8 +793,9 @@ function avatarHeight(obj) {
 
     var h2= Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
    // return h2;
-    console.error(h2,box.max.y - box.min.y);
-    return box.max.y - box.min.y;
+  //  console.error(h2,box.max.y - box.min.y);
+    return h2;
+    //return box.max.y - box.min.y;
 }
 
 
@@ -806,7 +815,8 @@ function testBS() {
 }
 
 // animate loader
-var letters = '0123456789ABCDEF';
+//var letters = '0123456789ABCDEF';
+var letters = '3456789ABC';
 let cc = 0;
 let ccinc = true;
 
@@ -850,8 +860,12 @@ function animateLoading() {
     if (!document.getElementById("loading")) {
         return;
     }
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
+
+    if (!self_loading) {
+        return;
+    }
+    var color = '#BB';
+    for (var i = 0; i < 4; i++) {
         color += letters[cc];
     }
 
@@ -902,19 +916,14 @@ document.addEventListener('keypress', (event) => {
 window.handleMocap = handleMocap;
 window.remoteMocap = remoteMocap;
 
-document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
-    if (e.target.id!="self-view")
-    return;
-    let obj = document.getElementById("self-view").object3D;
- 
 
-    console.log("model-loaded", e);
+function positionSelfView(){
+
+    let obj = document.getElementById("self-view").object3D;
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.1, -0.7);
-        //obj.position.set(0, -1.13, -0.45);
         obj.rotation.set(0, 0, 0);
-        //obj.rotation.set(-0.2, 0, 0);
-        obj.scale.set(1.3, 1.2, 1.2);
+        obj.scale.set(1.3, 1.2, 1.2());
     }
     else if (avatar_style == 'rpm') {
         //obj.position.set(0, (0.1 - height), -0.25);
@@ -926,12 +935,29 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
         //obj.rotation.set(-0.6, 0.5, -0.2);
 
         //obj.position.set(-0.07, (1.9 - height), -0.05);
+
+        obj.scale.set(0.095, 0.095, 0.095);
+        let height = avatarHeight(obj);
+        let w=window.innerWidth;
+        console.log(w,height);
+        if (w<700) {
+            obj.position.set(-0.035, (0.07 - height), -0.05);
+            obj.rotation.set(-0.4, 0.5, -0.13);
+        } else if (w<1200) {
+            obj.position.set(-0.06,  (0.075 - height), -0.05);
+            obj.rotation.set(-0.4, 0.6, -0.15);
+        } else {
+            obj.position.set(-0.11, (0.08 - height), -0.05);
+            obj.rotation.set(-0.4, 0.8, -0.2);
+        }
+ /*    
         obj.scale.set(0.095, 0.095, 0.095);
         let height = avatarHeight(obj);
         console.error(height);
-        obj.position.set(-0.07, (-0.2+ 0.175 - height), -0.05);
+        obj.position.set(-0.07, (0.06 - height), -0.05);
         obj.rotation.set(-0.4, 0.6, -0.15);
 
+  */ 
         // keep for face work
         // obj.position.set(0, (0.35 - height),-0.4);
         // obj.rotation.set(0, 0, 0);
@@ -941,6 +967,20 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
         obj.rotation.set(-0.436, 0, 0);
         //obj.rotation.set(-0.2, 0, 0);
     }
+}
+document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
+    if (e.target.id!="self-view")
+    return;
+    let obj = document.getElementById("self-view").object3D;
+ 
+    document.getElementById('touchmouse').setAttribute('visible','false');
+    document.getElementById('loadeye').setAttribute('visible','false');
+    document.getElementById('loading').setAttribute('visible','false');
+    document.getElementById('uiicons').style.display='block';
+    
+
+  //  console.log("model-loaded", e);
+    positionSelfView();
     self_loading = false;
 
     // spawn
@@ -975,6 +1015,16 @@ function rand(min,max){
 }
 
 async function init() {
+    if (isMobile()) {
+        document.getElementById('touchmouse').setAttribute('value', 'Touch and pinch screen to move around');
+        document.getElementById('touchmouse').object3D.position.x=-0.062;
+    } else 
+    {
+        document.getElementById('touchmouse').setAttribute('value', 'Use arrow, Q, E keys to move around');
+        document.getElementById('touchmouse').object3D.position.x=-0.055;
+    }
+
+
 
     //console.error("init", avatar_style)
     if (avatar_style == 'nico') {
@@ -991,11 +1041,13 @@ async function init() {
 
     }
     else if (avatar_style == 'rpm') {
-        frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
-            document.getElementById('frame').hidden = false;
-       // let v = 'https://models.readyplayer.me/64272f4020a87b0586ad3c58.glb';
-       // document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
-       // document.getElementById("self-view").setAttribute('gltf-model', v);
+       // frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
+      //  document.getElementById('frame').hidden = false;
+
+
+        let v = "https://models.readyplayer.me/6429ca28a5da014d03a67079.glb?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
+        document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
+        document.getElementById("self-view").setAttribute('gltf-model', v);
     }
 
     if (!mediapipe || mediapipe === "true") {
@@ -1054,6 +1106,13 @@ document.body.addEventListener('clientConnected', function (evt) {
   document.body.addEventListener('connected', function (evt) {
     console.log('connected event. clientId =', evt.detail.clientId, evt);
   });
+
+    window.addEventListener('resize', function(event) {
+        positionSelfView();
+       // console.warn("window resize ",window.innerWidth);
+    }, true);
+
+
 /*
 if (document.querySelector('a-scene').emit) {
     init();
