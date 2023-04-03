@@ -892,6 +892,10 @@ setInterval(() => {
 }, 30);
 
 setInterval(() => {
+    positionSelfView();
+}, 5000);
+
+setInterval(() => {
     animateDiscoLight();
 }, 120);
 
