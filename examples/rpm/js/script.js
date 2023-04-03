@@ -35,6 +35,7 @@ function subscribe(event) {
     if (json?.source !== 'readyplayerme') {
         return;
     }
+    //console.error(json);
     // Susbribe to all events sent from Ready Player Me once frame is ready
     if (json.eventName === 'v1.frame.ready') {
         frame.contentWindow.postMessage(
@@ -299,7 +300,7 @@ function remoteMocapProcess(blendshapes_values) {
             //console.log("match ",remoteClient);
             let obj=nn[n].components['networked'].el.object3D;
             try {
-              applyMocap(obj,blendshapes_values);    
+              applyMocap(obj,blendshapes_values,-1);    
             } catch (e) {
               //  console.log(e);
             }
@@ -343,7 +344,7 @@ function handleMocap(bs_csv) {
     }
     let blendshapes_values = bs_csv.split(',');
     let obj = document.getElementById("self-view").object3D;
-    applyMocap(obj, blendshapes_values);
+    applyMocap(obj, blendshapes_values,1);
 }
 
 let x=false;
@@ -453,7 +454,7 @@ RightHandThumb1:
 */
 }
 
-function applyMocap(obj, blendshapes_values){
+function applyMocap(obj, blendshapes_values,mirror){
     if (!obj || self_loading) {
         return;
     }
@@ -473,10 +474,10 @@ function applyMocap(obj, blendshapes_values){
     if (avatar_style == 'rpm') {
         head.rotation.x = 0.6 * pitch;
         neck.rotation.x = 0.4 * pitch;
-        head.rotation.y = -0.6 * yaw;
-        neck.rotation.y = -0.4 * yaw;
-        head.rotation.z = -0.6 * roll;
-        neck.rotation.z = -0.4 * roll;
+        head.rotation.y = mirror*0.6 * yaw;
+        neck.rotation.y = mirror*0.4 * yaw;
+        head.rotation.z = mirror*0.6 * roll;
+        neck.rotation.z = mirror*0.4 * roll;
     } else if (avatar_style == 'mh') {
         head.rotation.x = 0.6 * roll;
         neck.rotation.x = 0.4 * roll;
@@ -618,22 +619,10 @@ function onResultsFaceMesh(results) {
             blendshapes[rpm_blendshape_location_map['browInnerUp']]=left_up;
             blendshapes[rpm_blendshape_location_map['browOuterUpLeft']]=left_up;
             blendshapes[rpm_blendshape_location_map['browOuterUpRight']]=right_up;        
-        
-        
+            
             handleMocap(blendshapes.join());
             drawLandmarks(canvasCtx, newArray, { color: '#FF10F0', lineWidth: 2, radius: 2 });
             drawConnectors(canvasCtx, landmarks, FACEMESH_FACE_OVAL, {color:  '#FF6700', lineWidth: 1});
-          
-            /*
-            drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: '#C0C0C070', lineWidth: 1});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYE, {color: '#FF3030'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYEBROW, {color: '#FF3030'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_IRIS, {color: '#FF3030'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYE, {color: '#30FF30'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYEBROW, {color: '#30FF30'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_IRIS, {color: '#30FF30'});
-          drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, {color: '#E0E0E0'});
-*/
         }
     }
     canvasCtx.restore();
@@ -922,7 +911,7 @@ window.remoteMocap = remoteMocap;
 
 
 function positionSelfView(){
-
+    if (self_loading) return;
     let obj = document.getElementById("self-view").object3D;
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.1, -0.7);
@@ -944,14 +933,14 @@ function positionSelfView(){
         let height = avatarHeight(obj);
         let w=window.innerWidth;
         console.log(w,height);
-        if (w<510) {
+        if (w<600) {
             obj.position.set(-0.02, (0.065 - height), -0.05);
             obj.rotation.set(-0.4, 0.4, -0.11);
         }
-        else if (w<810) {
+        else if (w<1300) {
             obj.position.set(-0.035, (0.07 - height), -0.05);
             obj.rotation.set(-0.4, 0.5, -0.13);
-        } else if (w<1210) {
+        } else if (w<1610) {
             obj.position.set(-0.08,  (0.075 - height), -0.05);
             obj.rotation.set(-0.4, 0.6, -0.15);
         } else {
@@ -978,7 +967,6 @@ function positionSelfView(){
 }
 document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
     if (e.target.id!="self-view")
-    return;
 
     //    let obj = document.getElementById("self-view").object3D;
     document.getElementById('touchmouse').setAttribute('visible','false');
@@ -1006,14 +994,13 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     document.querySelector('a-scene').emit('connect');
     setTimeout(() => {
         positionSelfView();
-    }, 1000);
- //   positionSelfView();
+    }, 50);
+    positionSelfView();
 });
 
 function rand(min,max){
     let b=min+Math.random()*max;
     let r=(new Date()).getMilliseconds()%2 ? 1 : -1;
-
     b *=r; 
     return b;
 }
@@ -1042,29 +1029,18 @@ async function init() {
 
     }
     else if (avatar_style == 'rpm') {
-       // frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
-      //  document.getElementById('frame').hidden = false;
+        frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&bodyType=fullbody`;
+        document.getElementById('frame').hidden = false;
 
-
+/*
         let v = "https://models.readyplayer.me/6429ca28a5da014d03a67079.glb?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
         document.getElementById('player').setAttribute('player-info', 'gltfmodel', v);
         document.getElementById("self-view").setAttribute('gltf-model', v);
+  */
     }
 
     if (!mediapipe || mediapipe === "true") {
        // console.error("getUserMedia");
-
-       /*
-       navigator.mediaDevices.enumerateDevices()
-       .then((devices) => {
-         devices.forEach((device) => {
-           console.info(` BOB73 ${device.kind}: ${device.label} id = ${device.deviceId}`);
-         });
-       })
-       .catch((err) => {
-         console.error(`${err.name}: ${err.message}`);
-       });
-        */
        let deviceId=null;
        let cams = await AgoraRTC.getCameras();
        for (var i = 0; i < cams.length; i++) {
@@ -1106,6 +1082,6 @@ document.body.addEventListener('connected', function (evt) {
 console.log('connected event. clientId =', evt.detail.clientId, evt);
 });
 
-window.addEventListener('resize', function(event) {
+window.addEventListener('resize', function(event) {    
     positionSelfView();
 }, true);
