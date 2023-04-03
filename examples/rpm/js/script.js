@@ -967,6 +967,7 @@ function positionSelfView(){
 }
 document.getElementById("self-view").addEventListener('model-loaded', (e, f) => {
     if (e.target.id!="self-view")
+        return;
 
     //    let obj = document.getElementById("self-view").object3D;
     document.getElementById('touchmouse').setAttribute('visible','false');
