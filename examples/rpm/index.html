@@ -129,10 +129,10 @@
                 _state=STATE_STOP;
               }
               // stopped for more than 10
-              if (Date.now()-window._state_stop_at>10000) {
+              if (Date.now()-window._state_stop_at>18000) {
                 window._state_stop_at=Date.now(); // reset
               } // stopped for more than 5 then dance
-              else if (Date.now()-window._state_stop_at>5000) {
+              else if (Date.now()-window._state_stop_at>12000) {
                 local_body_anim=ANIM_DANCE;
               } else { // less than five then idle
                 local_body_anim=ANIM_IDLE;
@@ -210,7 +210,7 @@
   Click Me
 </button>-->
   <a-scene 
-  device-orientation-permission-ui="enabled: false"
+  device-orientation-permission-ui="enabled: true"
   networked-scene="
       app: 20b7c51ff4c644ab80cf5a4e646b0537;
       room: {'name':'test1', 'vbg0':false, 'showLocal': false};
