@@ -993,6 +993,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
 
     document.querySelector('a-scene').emit('connect');
+    window._state_stop_at=Date.now();
     setTimeout(() => {
         positionSelfView();
     }, 50);
