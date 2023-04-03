@@ -944,7 +944,11 @@ function positionSelfView(){
         let height = avatarHeight(obj);
         let w=window.innerWidth;
         console.log(w,height);
-        if (w<700) {
+        if (w<500) {
+            obj.position.set(-0.02, (0.07 - height), -0.05);
+            obj.rotation.set(-0.4, 0.4, -0.11);
+        }
+        else if (w<700) {
             obj.position.set(-0.035, (0.07 - height), -0.05);
             obj.rotation.set(-0.4, 0.5, -0.13);
         } else if (w<1200) {
@@ -984,7 +988,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     
 
   //  console.log("model-loaded", e);
-    positionSelfView();
+
     self_loading = false;
 
     // spawn
@@ -1007,6 +1011,7 @@ document.getElementById("self-view").addEventListener('model-loaded', (e, f) => 
     }
     //setTimeout(() => {document.querySelector('a-scene').emit('connect');},1000);
     document.querySelector('a-scene').emit('connect');
+    positionSelfView();
 });
 
 function rand(min,max){
