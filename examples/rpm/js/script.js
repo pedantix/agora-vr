@@ -30,7 +30,7 @@ if (!avatar_style) {
 }
 var mediapipe = getParameterByName("mediapipe");
 
-function subscribe(event) {
+async function subscribe(event) {
     const json = parse(event);
     if (json?.source !== 'readyplayerme') {
         return;
@@ -50,7 +50,13 @@ function subscribe(event) {
 
     // Get avatar GLB URL
     if (json.eventName === 'v1.avatar.exported') {
+        //https://models.readyplayer.me/6429ca28a5da014d03a67079.json
         console.log(`Avatar URL: ${json.data.url}`);
+        let jl=json.data.url.replace(".glb",".json");
+        const respJson = await fetch(jl).then(r => r.json());
+        local_body_gender=respJson.outfitGender;
+        console.error('avatar local_body_gender',local_body_gender);
+
         document.getElementById('frame').hidden = true;
         let v = json.data.url + "?morphTargets=ARKit,eyeLookDownLeft,eyeLookDownRight,eyeLookUpLeft,eyeLookUpRight,eyeLookInLeft,eyeLookInRight,eyeLookOutLeft,eyeLookOutRight,tongueOut";
         MorphData = {};
@@ -217,7 +223,8 @@ let BS_PITCH=53;
 let BS_ROLL=54;
 let BS_TOTAL_COUNT=55;
 
-let BODY_ANIM=55; // extra
+let BODY_GENDER=55; // extra
+let BODY_ANIM=56; // extra
 
 //map string to pos
 let rpm_blendshape_location_map={};
@@ -289,9 +296,7 @@ function remoteMocapOut() {
 // iOS ArKit52
 function remoteMocapProcess(blendshapes_values) {
 
-    //let blendshapes_values = bs_csv.split(',');
     let remoteClient=blendshapes_values[blendshapes_values.length-1];
-    //console.error(local_body_anim+" REM "+blendshapes_values.length);    
     let nn=document.querySelectorAll('[networked-audio-source]');
     for (let n=0; n<nn.length; n++) {
         if (nn[n].components['networked'] && 
@@ -313,7 +318,7 @@ function remoteMocapProcess(blendshapes_values) {
 
               try {
                // console.log("remoteMocap",blendshapes_values[BODY_ANIM],blendshapes_values);
-                applyAnim(obj,blendshapes_values[BODY_ANIM]);    
+                applyAnim(obj,blendshapes_values[BODY_GENDER],blendshapes_values[BODY_ANIM]);    
               } catch (e) {
                 //  console.log(e);
               }
@@ -336,10 +341,7 @@ function handleMocap(bs_csv) {
     //console.log("POP "+bs_csv.split(',').length);
     if (window.AgoraRtcAdapter && window.AgoraRtcAdapter.sendMocap)    
     {
-        let bs_csv_extra=bs_csv+","+local_body_anim;
-        //if (local_body_anim>0) {
-        //    let bsv2 = bs_csv_extra.split(',');
-       // }
+        let bs_csv_extra=bs_csv+","+local_body_gender+","+local_body_anim;
         window.AgoraRtcAdapter.sendMocap(bs_csv_extra);
     }
     let blendshapes_values = bs_csv.split(',');
@@ -348,23 +350,30 @@ function handleMocap(bs_csv) {
 }
 
 let x=false;
-let gltf_anims;
+let gltf_anims_male;
+let gltf_anims_female;
+
 
 async function loadAnimations(){
     let loader = new THREE.GLTFLoader();
-    gltf_anims = (await loader.loadAsync('./assets/FemaleRPMAnims.glb'));
+    gltf_anims_female = (await loader.loadAsync('./assets/FemaleRPMAnims.glb'));
+    gltf_anims_male = (await loader.loadAsync('./assets/MaleRPMAnims.glb'));
 }
 
-//let kanimation_mixer 
-async function playAnim(obj,anim_index){
+async function playAnim(obj,gender,anim_index){
     if (!obj) {
         return;
     }
 
-    if (!gltf_anims) {
+    if (!gltf_anims_female || !gltf_anims_male) {
         await loadAnimations();
     }
-
+    let gltf_anims;
+    if (gender=='feminine') {
+        gltf_anims=gltf_anims_female;
+    } else {
+        gltf_anims=gltf_anims_male;
+    }
     let anim_clip = gltf_anims.animations[anim_index]; 
     if (!anim_clip)
         return;
@@ -379,8 +388,8 @@ async function playAnim(obj,anim_index){
 }
 
 let animObj;
-async function applyAnim(obj,anim_index){
-    playAnim(obj,anim_index);
+async function applyAnim(obj,gender,anim_index){
+    playAnim(obj,gender,anim_index);
 }
 
 AFRAME.registerComponent('animate', {
@@ -804,7 +813,7 @@ function testBS() {
 
 // animate loader
 //var letters = '0123456789ABCDEF';
-var letters = '3456789ABC';
+var letters = '0000111222333445566778899AA';
 let cc = 0;
 let ccinc = true;
 
@@ -835,7 +844,7 @@ function animateDiscoLight() {
     light.object3D.position.set(Math.random() * 10, Math.random() * 10, Math.random() * 10);    
     light.setAttribute('light', "color:" + light_colors[colori]);
     colori++;
-    if (colori>light_colors.length) {
+    if (colori>light_colors.length) {1
         colori=0;
     }
     light.setAttribute('light', "intensity:" + 2+Math.random*2);
@@ -852,7 +861,7 @@ function animateLoading() {
     if (!self_loading) {
         return;
     }
-    var color = '#BB';
+    var color = '#BF';
     for (var i = 0; i < 4; i++) {
         color += letters[cc];
     }
@@ -864,14 +873,16 @@ function animateLoading() {
         cc--;
     }
 
-    if (cc > 12) {
+    if (cc >= letters.length) {
         cc--;
         ccinc = false;
     } else if (cc < 0) {
         cc++;
         ccinc = true;
     }
-    document.getElementById("loading").object3D.rotation.x -= Math.PI / 64;
+
+ //   console.warn(color);
+    //document.getElementById("loading").object3D.rotation.x -= Math.PI / 64;
     document.getElementById("loadeye").object3D.rotation.z -= Math.PI / 64;
     document.getElementById("loading").setAttribute('color', color);
 }
@@ -916,7 +927,7 @@ function positionSelfView(){
     if (avatar_style == 'nico') {
         obj.position.set(0, -1.1, -0.7);
         obj.rotation.set(0, 0, 0);
-        obj.scale.set(1.3, 1.2, 1.2());
+        obj.scale.set(1.3, 1.2, 1.2);
     }
     else if (avatar_style == 'rpm') {
         //obj.position.set(0, (0.1 - height), -0.25);
@@ -1008,9 +1019,11 @@ function rand(min,max){
 }
 
 async function init() {
-    if (isMobile()) {
+    if (!isMobile()) {
         document.getElementById('touchmouse').setAttribute('value', 'Touch and pinch screen to move around');
-        document.getElementById('touchmouse').object3D.position.x=-0.062;
+        document.getElementById('touchmouse').object3D.position.x=-0.04;
+        document.getElementById('touchmouse').object3D.scale.set(0.02,0.02,0.02);
+        
     } else 
     {
         document.getElementById('touchmouse').setAttribute('value', 'Use arrow, Q, E keys to move around');
