@@ -941,22 +941,29 @@ function positionSelfView(){
         //obj.position.set(-0.07, (1.9 - height), -0.05);
 
         obj.scale.set(0.095, 0.095, 0.095);
-        let height = avatarHeight(obj);
+        let height = 0.290; //avatarHeight(obj);
+        if (local_body_gender=='feminine')
+        {
+            height = 0.278;
+        }
+
         let w=window.innerWidth;
         console.log(w,height);
+        //let extra_height=0.001;
+        //console.warn(w);
         if (w<600) {
-            obj.position.set(-0.02, (0.065 - height), -0.05);
+            obj.position.set(-0.02, (0.07 - height), -0.05);
             obj.rotation.set(-0.4, 0.4, -0.11);
         }
         else if (w<1300) {
-            obj.position.set(-0.035, (0.07 - height), -0.05);
+            obj.position.set(-0.035, (0.072 - height), -0.05);
             obj.rotation.set(-0.4, 0.5, -0.13);
         } else if (w<1610) {
             obj.position.set(-0.08,  (0.075 - height), -0.05);
-            obj.rotation.set(-0.4, 0.6, -0.15);
+            obj.rotation.set(-0.4, 0.7, -0.18);
         } else {
             obj.position.set(-0.10, (0.08 - height), -0.05);
-            obj.rotation.set(-0.4, 0.8, -0.2);
+            obj.rotation.set(-0.4, 0.8, -0.21);
         }
  /*    
         obj.scale.set(0.095, 0.095, 0.095);
@@ -1098,5 +1105,8 @@ console.log('connected event. clientId =', evt.detail.clientId, evt);
 });
 
 window.addEventListener('resize', function(event) {    
-    positionSelfView();
+    //positionSelfView();
+    setTimeout(() => {
+        positionSelfView();
+    }, 50);
 }, true);
