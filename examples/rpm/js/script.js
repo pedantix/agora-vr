@@ -232,7 +232,6 @@ for (let i=0; i<rpm_blendshapes.length;i++){
     rpm_blendshape_location_map[rpm_blendshapes[i]]=i;
 }
 
-
 var mocap_frames=[]
 var mocap_delta=10;
 var mocap_forward=40;
@@ -338,7 +337,8 @@ window.handlePoseMocap = handlePoseMocap;
 // iOS ArKit52
 function handleMocap(bs_csv) {
     //console.log(Date.now());
-    //console.log("POP "+bs_csv.split(',').length);
+    
+    console.log("handleMocap "+bs_csv);
     if (window.AgoraRtcAdapter && window.AgoraRtcAdapter.sendMocap)    
     {
         let bs_csv_extra=bs_csv+","+local_body_gender+","+local_body_anim;
@@ -919,7 +919,6 @@ document.addEventListener('keypress', (event) => {
 // MediaPipe
 window.handleMocap = handleMocap;
 window.remoteMocap = remoteMocap;
-
 
 function positionSelfView(){
     if (self_loading) return;
