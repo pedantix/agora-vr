@@ -1019,7 +1019,7 @@ function rand(min,max){
 }
 
 async function init() {
-    if (!isMobile()) {
+    if (isMobile()) {
         document.getElementById('touchmouse').setAttribute('value', 'Touch and pinch screen to move around');
         document.getElementById('touchmouse').object3D.position.x=-0.04;
         document.getElementById('touchmouse').object3D.scale.set(0.02,0.02,0.02);
