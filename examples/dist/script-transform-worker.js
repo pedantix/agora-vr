@@ -45,6 +45,9 @@ onrtctransform = (event) => {
         if (chunk.value instanceof RTCEncodedAudioFrame) {
           const watermark = textEncoder.encode(watermarkText);
           watermarkText = "";
+          transformer.options.port.postMessage("CLEAR");
+//          transformer.options.port3.postMessage("BEN");
+          //console.warn("BB");
           const frame = chunk.value.data;
           const data = new Uint8Array(chunk.value.data.byteLength + watermark.byteLength + CustomDatLengthByteCount + CustomDataDetector.length);
           data.set(new Uint8Array(frame), 0);
@@ -58,10 +61,6 @@ onrtctransform = (event) => {
           const magicIndex = frame.byteLength + watermark.byteLength + CustomDatLengthByteCount;
           for (let i = 0; i < CustomDataDetector.length; i++) {
             data[magicIndex + i] = CustomDataDetector.charCodeAt(i);
-          }
-          if (logo++>50) {
-          //  console.warn("encoding",watermarkText);
-            logo=0;
           }
 
           chunk.value.data = data.buffer;
@@ -101,13 +100,7 @@ onrtctransform = (event) => {
   
             if (lastWatermark !== watermark) {
               lastWatermark = watermark;
-              //console.warn("decoded",watermark);
-              transformer.options.port.postMessage(watermark);
-              if (logi++>50) {
-              //  console.warn("decoding",watermark);
-                logi=0;
-              }
-    
+              transformer.options.port.postMessage(watermark);    
             }
   
             // Get frame data

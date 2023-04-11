@@ -116,8 +116,8 @@ const LEFT = 454;      // left most point
 const RIGHT = 234;     // right most point
 const TOP = 10;        // top most point                       
 const BOTTOM = 152;       // bot most point
-const LEFT_LIP = 78;      // left most point
-const RIGHT_LIP = 308;     // right most point
+const LEFT_LIP = 78;  // 57     // left most point
+const RIGHT_LIP =  308; // 287     // right most point 0.48 0.53  0.32 0.44
 const TOP_LIP = 13;      // left most point
 const BOTTOM_LIP = 14;
 const LEFT_BROW_UP = 105;
@@ -137,13 +137,15 @@ const LEFT_EYE_UP = 159;
 const LEFT_EYE_DOWN = 145;
 const LEFT_EYE_LEFT = 130;
 const LEFT_EYE_RIGHT = 133;
+const LEFT_JAW = 132;
+const RIGHT_JAW = 361;
+
 function ldistance(x, y) {
     deltaX = x.x - y.x;
     deltaY = x.y - y.y;
     deltaZ = x.z - y.z;
 
     return Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-
 }
 
 
@@ -216,7 +218,7 @@ function swivelHead(obj, roll, yaw, pitch) {
     }
 }
 */
-
+let blendshapesNeutral = [0.0856766,0.08509096,0.04416631,0,0,0.02075958,0.05995359,0.05044997,0,0,0,0,0.06333958,0.06059476,0,0,0.1233948,0.1233262,0.2249145,0.2248967,0.1552135,0.1565699,0.1084167,0.01461025,0.1069989,0,0.0935045,0.08081174,0.06888802,0,0,0.03872375,0.03300292,0.1214991,0.1276631,0.0682996,0.06274197,0.04613221,0,0.2165766,0.167179,0.1069419,0.04396585,0.1304866,0.06028794,0.1125906,0.1049666,0.0104436,0.008164653,0.05508019,0.04577279,3.348952e-07,-0.033934776, 0.010706255, 0.0024019803];
 let rpm_blendshapes = ["browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookOutLeft", "eyeLookOutRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "jawForward", "jawLeft", "jawOpen", "jawRight", "mouthClose", "mouthDimpleLeft", "mouthDimpleRight", "mouthFrownLeft", "mouthFrownRight", "mouthFunnel", "mouthLeft", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthPressLeft", "mouthPressRight", "mouthPucker", "mouthRight", "mouthRollLower", "mouthRollUpper", "mouthShrugLower", "mouthShrugUpper", "mouthSmileLeft", "mouthSmileRight", "mouthStretchLeft", "mouthStretchRight", "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight", "tongueOut"];
 let BS_YAW=52;
 let BS_PITCH=53;
@@ -338,7 +340,7 @@ window.handlePoseMocap = handlePoseMocap;
 function handleMocap(bs_csv) {
     //console.log(Date.now());
     
-    console.log("handleMocap "+bs_csv);
+   // console.log("handleMocap "+bs_csv);
     if (window.AgoraRtcAdapter && window.AgoraRtcAdapter.sendMocap)    
     {
         let bs_csv_extra=bs_csv+","+local_body_gender+","+local_body_anim;
@@ -365,6 +367,7 @@ async function playAnim(obj,gender,anim_index){
         return;
     }
 
+   // console.log("playAnim",gender,anim_index);
     if (!gltf_anims_female || !gltf_anims_male) {
         await loadAnimations();
     }
@@ -533,8 +536,8 @@ function onResultsFaceMesh(results) {
 */
             newArray.push(landmarks[LEFT_LIP]);
             newArray.push(landmarks[RIGHT_LIP]);
-            newArray.push(landmarks[TOP_LIP]);
-            newArray.push(landmarks[BOTTOM_LIP]);
+            newArray.push(landmarks[LEFT_JAW]);
+            newArray.push(landmarks[RIGHT_JAW]);
   /*
             newArray.push(landmarks[LEFT_BROW_UP]);
             newArray.push(landmarks[LEFT_BROW_DOWN]);
@@ -550,7 +553,7 @@ function onResultsFaceMesh(results) {
             newArray.push(landmarks[RIGHT_EYE_DOWN]);
 */
             //swivelHead(obj, landmarks[LEFT].y - landmarks[RIGHT].y, landmarks[LEFT].z - landmarks[RIGHT].z, landmarks[TOP].z - landmarks[BOTTOM].z);
-            let blendshapes=new Array(BS_TOTAL_COUNT).fill(0);
+            let blendshapes = [...blendshapesNeutral]; //new Array(BS_TOTAL_COUNT).fill(0);
             /*
             let blendshapes=[];
             for (var i = 0; i < BS_TOTAL_COUNT; i++) {
@@ -583,8 +586,7 @@ function onResultsFaceMesh(results) {
             blendshapes[BS_YAW]=3*(yaw);
             blendshapes[BS_ROLL]=-3*(roll);
 
-            let jaw_open= 8 * ldistance(landmarks[BOTTOM_LIP], landmarks[TOP_LIP]); // (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);
-            blendshapes[rpm_blendshape_location_map['jawOpen']]=jaw_open;
+            let jaw_open= 8 * ldistance(landmarks[BOTTOM_LIP], landmarks[TOP_LIP]); // (landmarks[BOTTOM_LIP].y - landmarks[TOP_LIP].y);       
             
             if (avatar_style=='nico') {
                 if (jaw_open > 0.4) {
@@ -594,10 +596,40 @@ function onResultsFaceMesh(results) {
                     blendshapes[rpm_blendshape_location_map['tongueOut']]=0;
                 }
             }
-            blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]= 10 * ldistance(landmarks[BOTTOM_LIP], landmarks[LEFT_LIP]);
-            blendshapes[rpm_blendshape_location_map['mouthSmileRight']]= 10 * ldistance(landmarks[BOTTOM_LIP],landmarks[RIGHT_LIP]);
 
-            //console.log(landmarks[BOTTOM_LIP].y-landmarks[LEFT_LIP].y);
+            let lip_width = ldistance(landmarks[LEFT_LIP], landmarks[RIGHT_LIP]);
+            let jaw_width = ldistance(landmarks[LEFT_JAW], landmarks[RIGHT_JAW]);
+            let l_j_ratio=lip_width/jaw_width; //0.28-0.45
+            let x=l_j_ratio-0.28;            
+            let smile=(x*10)/1.5;
+         //   console.log(" lip jaw lip/jaw ", smile.toFixed(3), jaw_open.toFixed(3));
+            
+            blendshapes[rpm_blendshape_location_map['jawOpen']]=jaw_open;
+
+            blendshapes[rpm_blendshape_location_map['cheekSquintLeft']]=smile*0.187+jaw_open*0.23;
+            blendshapes[rpm_blendshape_location_map['cheekSquintRight']]=smile*0.187+jaw_open*0.23;
+
+            blendshapes[rpm_blendshape_location_map['mouthDimpleLeft']]=smile*0.4;
+            blendshapes[rpm_blendshape_location_map['mouthDimpleRight']]=smile*0.4;
+
+            blendshapes[rpm_blendshape_location_map['mouthLowerDownLeft']]=jaw_open*0.7;
+            blendshapes[rpm_blendshape_location_map['mouthLowerDownRight']]=jaw_open*0.7;
+
+            blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]=smile*0.6+jaw_open*0.4;
+            blendshapes[rpm_blendshape_location_map['mouthSmileRight']]=smile*0.6+jaw_open*0.8;
+
+            blendshapes[rpm_blendshape_location_map['mouthStretchLeft']]=jaw_open*0.6;
+            blendshapes[rpm_blendshape_location_map['mouthStretchRight']]=jaw_open*0.6;
+
+            blendshapes[rpm_blendshape_location_map['mouthUpperUpLeft']]=jaw_open*0.4;
+            blendshapes[rpm_blendshape_location_map['mouthUpperUpRight']]=jaw_open*0.4;
+
+            blendshapes[rpm_blendshape_location_map['noseSneerLeft']]=jaw_open*0.4;
+            blendshapes[rpm_blendshape_location_map['noseSneerRight']]=jaw_open*0.4;
+
+            //blendshapes[rpm_blendshape_location_map['mouthSmileLeft']]= 10 * ldistance(landmarks[BOTTOM_LIP], landmarks[LEFT_LIP]);
+            //blendshapes[rpm_blendshape_location_map['mouthSmileRight']]= 10 * ldistance(landmarks[BOTTOM_LIP],landmarks[RIGHT_LIP]);
+
             let top = ldistance(landmarks[TOP], landmarks[CENTER_BELOW_NOSE]);
             let left = ldistance(landmarks[LEFT_BROW_UP], landmarks[LEFT_BROW_DOWN]);
             let center = ldistance(landmarks[CENTER_BROW_UP], landmarks[CENTER_BROW_DOWN]);
@@ -607,18 +639,18 @@ function onResultsFaceMesh(results) {
             let left_eye_h = ldistance(landmarks[LEFT_EYE_LEFT], landmarks[LEFT_EYE_RIGHT]);
             let right_eye = ldistance(landmarks[RIGHT_EYE_UP], landmarks[RIGHT_EYE_DOWN]);
             let right_eye_h = ldistance(landmarks[RIGHT_EYE_LEFT], landmarks[RIGHT_EYE_RIGHT]);
-           // console.log(right_eye/right_eye_h,left_eye/left_eye_h);
             let left_eye_ratio=left_eye/left_eye_h;
             let right_eye_ratio=right_eye/right_eye_h;
 
             //console.log(left_eye_ratio,right_eye_ratio);
-            blendshapes[rpm_blendshape_location_map['eyeBlinkLeft']]= (0.42-left_eye_ratio)*20;
-            blendshapes[rpm_blendshape_location_map['eyeSquintLeft']]= (0.42-left_eye_ratio)*20;
-            blendshapes[rpm_blendshape_location_map['eyeWideLeft']]= (left_eye_ratio-0.42)*7;
+            
+            blendshapes[rpm_blendshape_location_map['eyeBlinkLeft']]= (0.42-left_eye_ratio)*6;
+            blendshapes[rpm_blendshape_location_map['eyeSquintLeft']]= (0.42-left_eye_ratio)*6;
+            blendshapes[rpm_blendshape_location_map['eyeWideLeft']]= (left_eye_ratio-0.42)*3;
 
-            blendshapes[rpm_blendshape_location_map['eyeBlinkRight']]= (0.42-right_eye_ratio)*20;
-            blendshapes[rpm_blendshape_location_map['eyeSquintRight']]= (0.42-right_eye_ratio)*20;
-            blendshapes[rpm_blendshape_location_map['eyeWideRight']]= (right_eye_ratio-0.42)*7;
+            blendshapes[rpm_blendshape_location_map['eyeBlinkRight']]= (0.42-right_eye_ratio)*6;
+            blendshapes[rpm_blendshape_location_map['eyeSquintRight']]= (0.42-right_eye_ratio)*6;
+            blendshapes[rpm_blendshape_location_map['eyeWideRight']]= (right_eye_ratio-0.42)*3;
             
             let facesize = TOP - CENTER_BELOW_NOSE;
             let left_up = (20 * (left - (0.14 * top / 0.46)))
@@ -813,7 +845,7 @@ function testBS() {
 
 // animate loader
 //var letters = '0123456789ABCDEF';
-var letters = '0000111222333445566778899AA';
+var letters = '222233334445556677889A';
 let cc = 0;
 let ccinc = true;
 
@@ -861,8 +893,8 @@ function animateLoading() {
     if (!self_loading) {
         return;
     }
-    var color = '#BF';
-    for (var i = 0; i < 4; i++) {
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
         color += letters[cc];
     }
 
@@ -945,11 +977,9 @@ function positionSelfView(){
         {
             height = 0.278;
         }
-
+        //height=0.26;
         let w=window.innerWidth;
-        console.log(w,height);
-        //let extra_height=0.001;
-        //console.warn(w);
+        //console.log(w,height);
         if (w<600) {
             obj.position.set(-0.02, (0.07 - height), -0.05);
             obj.rotation.set(-0.4, 0.4, -0.11);
@@ -1078,7 +1108,9 @@ async function init() {
             audio: true
         };
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            window.gum_stream=stream;
             camera.start();
+
         });
     }
 }

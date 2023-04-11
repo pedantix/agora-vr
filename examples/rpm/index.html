@@ -58,6 +58,7 @@
     let local_body_gender='';
     let local_base_anim=3;
     let ANIM_IDLE=0;
+    let gum_stream=null;
     let ANIM_WALKING=1;
     let ANIM_DANCE=3;
     window._state_stop_at=0;
@@ -118,7 +119,7 @@
             let x=pos.x;
             let z=pos.z;
             if (local_pos_x!=x || local_pos_z!=z) {
-              //console.log("moving");
+          //    console.error("moving");
                 local_pos_x=x;
                 local_pos_z=z;
                 local_body_anim=ANIM_WALKING;
@@ -165,9 +166,10 @@
 
     .videoUI {
       position: fixed;
-      left: -1000px;
+      bottom: 0px;
+      left: -1000px; // 0px
       width: 320px;
-      height: 90px;
+      height: 180px;
       z-index: 15;
       opacity: 1.0;
       pointer-events: none;
@@ -283,10 +285,10 @@
   <div class="videoUI">
     <div class="video-canvas-container">
       <canvas id="canvas_secret" class="output_canvas" width="200px" height="150px"
-        style=" width:160px; height:90px; border: 0px solid white;"></canvas>
+        style=" width:320px; height:180px; border: 0px solid white;"></canvas>
     </div>
     <div class="video-canvas-container"
-      style="display:none; width: 160px; height: 90px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
+      style="display:none; width: 320px; height: 180px; margin-top: 17px; margin-left: -186px; border: 1px solid white;">
       <video crossorigin="anonymous" controls="false" preload='auto' playsinline autoplay
         style="width: 160px; height: 90px;" id="local_video" class="player">
     </div>
