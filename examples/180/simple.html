@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+</head>
+<body>
+
+    <video id="video" autoplay crossorigin="anonymous" playsinline webkit-playsinline>        
+    </video>   
+
+    <canvas id="canvas" width=640 height="360" >        
+    </canvas>   
+
+	<script>
+        var appid="20b7c51ff4c644ab80cf5a4e646b0537";
+        var room="ios";
+        var token=null;
+        var clientId=null;
+        var agoraClient=AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+        async function agora() {
+
+            agoraClient.on("user-joined", async (user) => {
+            console.warn("user-joined",user);
+            });
+
+            agoraClient.on("user-published", async (user, mediaType) => {
+            await agoraClient.subscribe(user, mediaType);
+            if (mediaType === 'video') {
+                var videoStream = new MediaStream();
+                videoStream.addTrack(user.videoTrack._mediaStreamTrack);
+                document.querySelector("#video").srcObject=videoStream;
+                document.querySelector("#video").play();
+            }
+            if (mediaType === 'audio') {
+                user.audioTrack.play();
+            }
+            });
+                
+            await agoraClient.join(appid, room, token || null, clientId || null);
+            //  var audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            //  await agoraClient.publish([audioTrack]);
+            setInterval(loop,33);
+        }
+
+	function airplay() {
+		var c=document.getElementsByTagName("canvas")[0];
+		var video = document.createElement('video');
+		video.src = c.captureStream(30);
+		video.autoplay = true;
+    		video.webkitShowPlaybackTargetPicker();
+	}
+
+    var canvas = document.getElementById('canvas');
+    var myvideo = document.getElementById('video');
+    var canvasCtx = canvas.getContext('2d');
+
+    function loop() {
+        canvasCtx.drawImage(myvideo, 0, 0, 640, 360);
+    }
+    
+	</script>
+
+<button style="position:absolute; left: 10px; top: 10px;" onclick="agora();">connect</button>
+<br><br><br>
+<button style="position:absolute; left: 10px; top: 30px;" onclick="airplay();">airplay</button>
+
+
+</body>
+</html>
