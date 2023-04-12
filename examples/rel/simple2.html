@@ -1,0 +1,97 @@
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script src="aframe.min.js"></script>
+  <script src="play-on-window-click2.js"></script>
+  <script src="play-on-vrdisplayactivate-or-enter-vr.js"></script>
+  <script src="hide-once-playing2.js"></script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+<body>
+
+  <a-scene>
+    <a-assets>
+      <video id="video"
+               loop crossorigin="anonymous" playsinline webkit-playsinline>                                
+      </video>
+      
+    </a-assets>
+
+    <!-- Define camera with user height, movement control and arrow key rotation added. -->
+    <a-camera look-controls arrow-key-rotation>
+      <!-- Text element for display messaging.  Hide once video is playing. -->
+      <a-entity id="msg" position="0 -0.3 -1.5" text="align:center; 
+                width:6;
+                wrapCount:100;
+                color:white;
+                value:Click window to make the video play, if needed."
+                hide-once-playing="#video">
+      </a-entity>
+    </a-camera>  
+    </a-entity>
+    <a-videosphere rotation="0 180 0" src="#video" radius="4200"
+                     play-on-window-click
+                     play-on-vrdisplayactivate-or-enter-vr>
+    </a-videosphere>
+    <a-entity light="color: #ccccff; intensity: 0.5; type: ambient;" visible="true"></a-entity>
+    <a-entity light="color: #f8ffc2; intensity: 0.82; castShadow: false" position="2.69 7.89 -0.13" rotation="0 0.01 0"></a-entity>
+  </a-scene>
+
+  <script>
+    var appid="20b7c51ff4c644ab80cf5a4e646b0537";
+    var room="ios";
+    var token=null;
+    var clientId=null;
+    var agoraClient=AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    var at=null;
+    var vt=null;
+    async function agora() {
+
+        agoraClient.on("user-joined", async (user) => {
+        console.warn("user-joined",user);
+        });
+
+        agoraClient.on("user-published", async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        if (mediaType === 'video') {
+            vt=user.videoTrack;           
+        }
+        if (mediaType === 'audio') {
+            //user.audioTrack.play();
+            at=user.audioTrack;
+        }
+        if (at && vt) {
+            var videoStream = new MediaStream();
+            videoStream.addTrack(vt._mediaStreamTrack);
+            videoStream.addTrack(at._mediaStreamTrack);
+            document.querySelector("#video").srcObject=videoStream;
+            document.querySelector("#video").play();
+            
+        }
+        });
+            
+        await agoraClient.join(appid, room, token || null, clientId || null);
+
+    }
+
+    function airplay() {
+                var c=document.getElementsByTagName("canvas")[0];
+                var video = document.createElement('video');
+                //video.src = c.captureStream(30);
+                let s = c.captureStream();
+                video.src = s;
+                window.s=s;
+                video.autoplay = true;
+                video.webkitShowPlaybackTargetPicker();
+        }
+
+</script>
+
+<button style="position:absolute; left: 10px; top: 10px;" onclick="agora();">connect</button>
+<br><br><br>
+<button style="position:absolute; left: 10px; top: 30px;" onclick="airplay();">airplay</button>
+
+
+</body>
+</html>
