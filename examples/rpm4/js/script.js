@@ -952,7 +952,7 @@ async function init() {
     if (!mediapipe || mediapipe === "true") {
        // console.error("getUserMedia");
 
-       /*
+	    /*
        navigator.mediaDevices.enumerateDevices()
        .then((devices) => {
          devices.forEach((device) => {
@@ -962,7 +962,7 @@ async function init() {
        .catch((err) => {
          console.error(`${err.name}: ${err.message}`);
        });
-        */
+       */
        let deviceId=null;
        let cams = await AgoraRTC.getCameras();
        for (var i = 0; i < cams.length; i++) {
@@ -979,9 +979,9 @@ async function init() {
             },
             audio: true
         };
-//        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-//            camera.start();
-//        });
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            camera.start();
+        });
     }
   //  document.querySelector('a-scene').emit('connect');
 }

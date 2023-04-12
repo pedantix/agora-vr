@@ -132,7 +132,7 @@
                 _state=STATE_STOP;
               }
               // stopped for more than 10
-              if (Date.now()-window._state_stop_at>18000) {
+              if (Date.now()-window._state_stop_at>16200) {
                 window._state_stop_at=Date.now(); // reset
               } // stopped for more than 5 then dance
               else if (Date.now()-window._state_stop_at>12000) {
