@@ -1,0 +1,38 @@
+
+<body id="body">
+<div style="width:10px;height:10px">
+<video   style="width:10px;height:10px" id="video" autoplay muted loop crossorigin="anonymous" playsinline webkit-playsinline
+  src="https://vr-demo.agora.io/rel/amfootie.mp4"></video>
+</div>
+<canvas id="canvas" width=640 height="360"> </canvas>
+
+<br><br><br>
+
+<button style="position:absolute; left: 10px; top: 30px;" onclick="airplay();">airplay</button>
+</body>
+<script>
+
+  function airplay() {
+    var c = document.getElementById('canvas');
+    var video = document.createElement('video');
+    document.getElementById("body").appendChild(video);
+    video.autoplay = true;
+    video.playsInline = true;
+    video.srcObject = c.captureStream();
+    video.play();
+    video.webkitShowPlaybackTargetPicker();
+  }
+
+  var canvas = document.getElementById('canvas');
+  var myvideo = document.getElementById('video');
+  var canvasCtx = canvas.getContext('2d');
+
+  function loop() {
+    canvasCtx.drawImage(myvideo, 0, 0, 640, 360);
+    canvasCtx.font = "48px serif";
+    canvasCtx.fillStyle = "blue";
+    canvasCtx.fillText("Hello world "+(Date.now()), 10, 50);
+  }
+
+  setInterval(loop, 33);
+</script>
